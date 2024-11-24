@@ -1,0 +1,3 @@
+[submodule "editor/external/imoguizmo"]
+	path = editor/external/imoguizmo
+	url = https://github.com/fknfilewalker/imoguizmo.git
