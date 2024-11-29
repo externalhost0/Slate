@@ -4,14 +4,14 @@
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 
-#include "Slate/Components.h"
-#include "Slate/Entity.h"
-#include "Slate/Time.h"
+#include <Slate/Components.h>
+#include <Slate/Entity.h>
+#include <Slate/Time.h>
+#include <Slate/ShaderManager.h>
 
 #include <fstream>
 
 #include "Editor.h"
-#include "SettingsWindow.h"
 
 namespace Slate {
     // set of helper functions for error messages
@@ -23,85 +23,92 @@ namespace Slate {
     }
 
 
-    bool Editor::Init() {
+    void Editor::Init() {
         setupErrorHandling();
-        LoadConfig();
-        if (m_EditorWindow->CreateWindow() != EXIT_SUCCESS)
-            return EXIT_FAILURE;
+
+        m_EditorLayer = CreateScope<EditorLayer>();
+        // generate the main editor window, createScope builds it
+        WindowSpecification winspec;
+        winspec.m_VideoMode = WINDOWED;
+        winspec.m_IsResizeable = true;
+        winspec.m_WindowTitle = "Slate Editor";
+        m_MainWindow = CreateScope<Window>(winspec);
+
+        // idk where to put this
+        Renderer::Init();
+
 
         // must be done before attaching, lets find a better way later
         // prefferably through constructors and not functions that are arbitraly called
-        m_EditorLayer.Bootstrap();
+        m_EditorLayer->Bootstrap();
 
         // i believe the order should go like this, be open to moving entity creation around
         // tests scene on startup, make a cube and give it the following components
 
-        Entity cube1 = m_EditorLayer.m_ActiveContext->m_ActiveScene->CreateEntity("Cube1");
+        Renderer::GetShaderManager().Setup();
+        Renderer::GetShaderManager().Load("Basic", "../editor/assets/shaders/static.vert", "../editor/assets/shaders/basic.frag");
+
+         // all of the above does nothing
+
+
+        Entity cube1 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Cube1");
         cube1.AddComponent<TransformComponent>(glm::vec3(2.0f, 0.0f, 0.0f));
-        cube1.AddComponent<PrimitiveComponent>(MeshCube());
+        cube1.AddComponent<MeshComponent>(MeshCube("Basic"));
 
-        Entity cube2 = m_EditorLayer.m_ActiveContext->m_ActiveScene->CreateEntity("Cube2");
+        Entity cube2 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Cube2");
         cube2.AddComponent<TransformComponent>(glm::vec3(0.0f, 5.0f, 2.0f));
-        cube2.AddComponent<PrimitiveComponent>(MeshCube());
+        cube2.AddComponent<MeshComponent>(MeshCube("Basic"));
 
-        Entity plane1 = m_EditorLayer.m_ActiveContext->m_ActiveScene->CreateEntity("Plane1");
+        Entity plane1 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Plane1");
         plane1.AddComponent<TransformComponent>(glm::vec3(0.0f, -5.0f, 0.0f));
         plane1.GetComponent<TransformComponent>().Rotation = {-90.0f, 0.0f, 0.0f};
         plane1.GetComponent<TransformComponent>().Scale = {10.0f, 10.f, 0.0f};
-        plane1.AddComponent<PrimitiveComponent>(MeshPlane());
+        plane1.AddComponent<MeshComponent>(MeshPlane("Basic"));
 
-        Entity object1 = m_EditorLayer.m_ActiveContext->m_ActiveScene->CreateEntity("Object1");
+        Entity object1 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Object1");
         object1.AddComponent<TransformComponent>(glm::vec3(-6.0f, 0.0f, 0.0f));
-        object1.AddComponent<ModelComponent>(MeshImport("../editor/assets/models/icosphere.obj"));
+        object1.AddComponent<MeshComponent>(MeshImport("Basic", "../editor/assets/models/icosphere.obj"));
 
-        Entity object2 = m_EditorLayer.m_ActiveContext->m_ActiveScene->CreateEntity("Column1");
+        Entity object2 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Column1");
         object2.AddComponent<TransformComponent>(glm::vec3(-3.0f, 0.0f, -5.0f));
-        object2.AddComponent<ModelComponent>(MeshImport("../editor/assets/models/column.obj"));
-
-
+        object2.AddComponent<MeshComponent>(MeshImport("Basic", "../editor/assets/models/column.obj"));
 
         // link imgui callbacks to main editor window
-        ImGui_ImplGlfw_InstallCallbacks(m_EditorWindow->GetWindow());
-
-        // let the Editor know it did its bootup sequence successfully :)
-        return EXIT_SUCCESS;
+        ImGui_ImplGlfw_InstallCallbacks(m_MainWindow->GetNativeWindow());
     }
 
     void Editor::Loop() {
-        while (!glfwWindowShouldClose(m_EditorWindow->GetWindow())) {
+        while (!glfwWindowShouldClose(m_MainWindow->GetNativeWindow())) {
             Time::CalculateDeltaTime();
             glfwPollEvents();
             // actual stuff
-            glfwMakeContextCurrent(m_EditorWindow->GetWindow());
-            m_EditorLayer.OnUpdate();
-            // the additional settings window that can be opened
-            SettingsWindow::OnUpdate(m_EditorWindow->GetWindow());
+
+            m_EditorLayer->OnUpdate();
+
             // basic glfw things
-            glfwSwapBuffers(m_EditorWindow->GetWindow());
+            glfwSwapBuffers(m_MainWindow->GetNativeWindow());
         }
     }
 
     void Editor::Shutdown() {
 //        SaveConfig();
         // editor personal shutdown
-        m_EditorLayer.OnDetach();
+        m_EditorLayer->OnDetach();
         // imgui shutdown
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
         // glfw shutdown
-        glfwDestroyWindow(m_EditorWindow->GetWindow());
+        glfwDestroyWindow(m_MainWindow->GetNativeWindow());
         glfwTerminate();
     }
 
     // most important function ig, this is the cycle order of the program
-    bool Editor::Run() {
-        if (Init() != EXIT_SUCCESS) { std::cerr << "Editor Initilization Failed Successfully!" << std::endl; return EXIT_FAILURE; }
+    void Editor::Run() {
+        Init();
         Loop();
         Shutdown();
-        return EXIT_SUCCESS;
     }
-
 
     // some helper functions, move later
     void Editor::SaveConfig() const {

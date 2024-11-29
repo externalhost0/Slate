@@ -6,21 +6,12 @@
 #ifndef SLATE_DEFINES_H
 #define SLATE_DEFINES_H
 
-//#include <memory>
 // below for expect
-#include <csignal>
-#include <functional>
+
 
 namespace Slate {
 
-    // our error macro
-#define EXPECT(ERROR, FORMAT, ...) {                                                                                                        \
-    int macroErrorCode = ERROR;                                                                                                             \
-    if(!macroErrorCode) {                                                                                                                    \
-        fprintf(stderr, "%s -> %s -> %i -> Error(%i):\n\t" FORMAT "\n", __FILE__, __func__, __LINE__, macroErrorCode, ##__VA_ARGS__);       \
-        raise(SIGABRT);                                                                                                                     \
-    }                                                                                                                                       \
-}
+
 
 // Platform detection
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__)

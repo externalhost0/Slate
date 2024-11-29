@@ -6,12 +6,13 @@
 #define SLATE_FRAMEBUFFER_H
 
 #include <vector>
-#include "../../../engine/src/errors.h"
+#include <Slate/Expect.h>
 
 namespace Slate {
     enum class FramebufferTextureFormat{
         None = 0,
         RGBA8,
+        RGBA16F,
         RED_INTEGER,
         DEPTH24STENCIL8,
 

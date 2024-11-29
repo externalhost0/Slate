@@ -2,7 +2,8 @@
 // Created by Hayden Rivas on 11/5/24.
 //
 
-#include <GL/glew.h>
+#include <glad/glad.h>
+
 #include <iostream>
 #include <utility>
 #include <glm/vec3.hpp>
@@ -25,7 +26,14 @@ namespace Slate {
         static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index) {
             bool multisampled = samples > 1;
             if (multisampled) {
-                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalFormat, (GLsizei) width, (GLsizei) height, GL_FALSE);
+                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalFormat, (GLsizei) width,(GLsizei) height, GL_TRUE);
+                if (format == GL_RED_INTEGER) {
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+                } else {
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+                }
             }
             else {
                 glTexImage2D(GL_TEXTURE_2D, 0, (GLint) internalFormat, (GLsizei) width, (GLsizei) height, 0, format, GL_UNSIGNED_BYTE, nullptr);
@@ -47,10 +55,13 @@ namespace Slate {
         }
         static void AttachDepthTexture(uint32_t id, int samples, GLenum format, GLenum attachmentType, uint32_t width, uint32_t height) {
             bool multisampled = samples > 1;
-            if (multisampled)
-                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, format, (GLsizei) width, (GLsizei) height, GL_FALSE);
+            if (multisampled) {
+                glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, format, (GLsizei) width, (GLsizei) height,GL_TRUE);
+                glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            }
             else {
-                glTexStorage2D(GL_TEXTURE_2D, 1, format, (GLsizei) width, (GLsizei) height);
+                glTexImage2D(GL_TEXTURE_2D, 0, format, (GLsizei) width, (GLsizei) height, 0, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
                 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -142,6 +153,9 @@ namespace Slate {
                         break;
                     case FramebufferTextureFormat::RED_INTEGER:
                         Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, (int) i);
+                        break;
+                    case FramebufferTextureFormat::RGBA16F:
+                        Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA16F, GL_RGBA, m_Specification.Width, m_Specification.Height, (int) i);
                         break;
                     default:
                         std::cerr << "Not a supported color format!" << std::endl;

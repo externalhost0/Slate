@@ -13,8 +13,8 @@
 #include "../../external/IconFontCppHeaders/IconsLucide.h"
 #include "Fonts.h"
 
-
 namespace Slate {
+    struct TransformComponent;
     // helper functions
     ImVec4 Brighten(const ImVec4& color, float amount);
     ImVec4 Desaturate(const ImVec4& color, float amount);

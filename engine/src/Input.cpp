@@ -20,8 +20,8 @@ namespace Slate {
         return {(float) x_pos, (float) y_pos };
     }
 
-    void Input::SetWindow(GLFWwindow& iWindow) {
-        m_Window = &iWindow;
+    void Input::SetWindow(GLFWwindow* window) {
+        m_Window = window;
     }
 
     int Input::GetInputMode() {

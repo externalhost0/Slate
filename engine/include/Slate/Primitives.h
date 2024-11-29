@@ -15,9 +15,9 @@ namespace Slate {
     constexpr float quadVertices[] = {
             // positions             // texCoords
             -1.0f, 1.0f,  0.0f, 1.0f, // top left
-            -1.0f,  -1.0f,  0.0f, 0.0f, // bottom left
+            -1.0f, -1.0f,  0.0f, 0.0f, // bottom left
             1.0f, -1.0f,  1.0f, 0.0f, // bottom right
-            1.0f,  1.0f,  1.0f, 1.0f // top right
+            1.0f, 1.0f,  1.0f, 1.0f // top right
     };
     constexpr unsigned int quadIndices[] = {
             0, 1, 3,   // first triangle
@@ -25,47 +25,62 @@ namespace Slate {
     };
 
     constexpr float planeVertices[] = {
-            // Position          // Normal           // TexCoord
-            -1.0f,  1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 1.0f,  // Top left
-            -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // Bottom left
-            1.0f, -1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 0.0f, // Bottom right
-            1.0f,  1.0f, 0.0f,   0.0f, 0.0f, 1.0f,   1.0f, 1.0f // Top right
+            // Position                           // Normal                          // TexCoord
+            -1.0f,  1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   0.0f, 1.0f,  // Top left
+            -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   0.0f, 0.0f, // Bottom left
+            1.0f, -1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   1.0f, 0.0f, // Bottom right
+            1.0f,  1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   1.0f, 1.0f // Top right
     };
     constexpr unsigned int planeIndices[] = {
             0, 1, 3,
             1, 2, 3
     };
-    constexpr float cubeVertices[] = {
-            // Position             // Normal           // TexCoord
-            -1.0f,  1.0f,  1.0f,    0.0f,  0.0f,  1.0f,  0.0f,  1.0f,  // Front top left
-            -1.0f, -1.0f,  1.0f,    0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  // Front bottom left
-            1.0f, -1.0f,  1.0f,    0.0f,  0.0f,  1.0f,  1.0f,  0.0f,  // Front bottom right
-            1.0f,  1.0f,  1.0f,    0.0f,  0.0f,  1.0f,  1.0f,  1.0f,  // Front top right
 
-            -1.0f,  1.0f, -1.0f,    0.0f,  0.0f, -1.0f,  0.0f,  1.0f,  // Back top left
-            -1.0f, -1.0f, -1.0f,    0.0f,  0.0f, -1.0f,  0.0f,  0.0f,  // Back bottom left
-            1.0f, -1.0f, -1.0f,    0.0f,  0.0f, -1.0f,  1.0f,  0.0f,  // Back bottom right
-            1.0f,  1.0f, -1.0f,    0.0f,  0.0f, -1.0f,  1.0f,  1.0f,  // Back top right
-    };
-    constexpr unsigned int cubeIndices[] = {
-            0, 1, 3, 3, 1, 2,
-            1, 5, 2, 2, 5, 6,
-            5, 4, 6, 6, 4, 7,
-            4, 0, 7, 7, 0, 3,
-            3, 2, 7, 7, 2, 6,
-            4, 5, 0, 0, 5, 1
-    };
+    const float cubeVertices[] = {
+            // Position                                 // Normal                                   // TexCoord
+            -1.0f,  -1.0f,  -1.0f,      0.0f,  0.0f,  -1.0f,           0.0f, 0.0f,  // A 0
+            1.0f,   -1.0f, -1.0f,     0.0f,  0.0f,  -1.0f,         1.0f, 0.0f,  // B 1
+            1.0f,   1.0f,  -1.0f,    0.0f,  0.0f,  -1.0f,       1.0f, 1.0f,  // C 2
+            -1.0f,  1.0f,  -1.0f,   0.0f,  0.0f,  -1.0f,       0.0f, 1.0f,  // D 3
+            -1.0f, -1.0f, 1.0f,     0.0f,  0.0f,  1.0f,         0.0f, 0.0f,  // E 4
+            1.0f,  -1.0f,  1.0f,    0.0f,  0.0f,  1.0f,        1.0f, 0.0f,   // F 5
+            1.0f,   1.0f,  1.0f,    0.0f,  0.0f,  1.0f,        1.0f, 1.0f,   // G 6
+            -1.0f,  1.0f,  1.0f,    0.0f,  0.0f,  1.0f,         0.0f, 1.0f,   // H 7
 
-// random vertex colors
-    const float cubeVertexColors[24] = {
-            0.014f, 0.184f, 0.576f,
-            0.771f, 0.328f, 0.970f,
-            0.406f, 0.615f, 0.116f,
-            0.676f, 0.977f, 0.133f,
-            0.971f, 0.572f, 0.833f,
-            0.140f, 0.616f, 0.489f,
-            0.997f, 0.513f, 0.064f,
-            0.945f, 0.719f, 0.592f,
+            -1.0f,  1.0f, -1.0f,    -1.0f,  0.0f,  0.0f,         0.0f, 0.0f,  // D 8
+            -1.0f, -1.0f, -1.0f,    -1.0f,  0.0f,  0.0f,         1.0f, 0.0f,  // A 9
+            -1.0f, -1.0f,  1.0f,    -1.0f,  0.0f,  0.0f,         1.0f, 1.0f,  // E 10
+            -1.0f,  1.0f,  1.0f,    -1.0f,  0.0f,  0.0f,         0.0f, 1.0f,  // H 11
+            1.0f,  -1.0f, -1.0f,   1.0f,  0.0f,  0.0f,       0.0f, 0.0f,   // B 12
+            1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,     1.0f, 0.0f,   // C 13
+            1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,      1.0f, 1.0f,   // G 14
+            1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,     0.0f, 1.0f,   // F 15
+
+            -1.0f, -1.0f, -1.0f,  0.0f,  -1.0f,  0.0f,     0.0f, 0.0f,  // A 16
+            1.0f,  -1.0f, -1.0f,  0.0f,  -1.0f,  0.0f,    1.0f, 0.0f,   // B 17
+            1.0f,  -1.0f, 1.0f,  0.0f,  -1.0f,  0.0f,   1.0f, 1.0f,   // F 18
+            -1.0f, -1.0f, 1.0f,   0.0f,  -1.0f,  0.0f,     0.0f, 1.0f,  // E 19
+            1.0f,  1.0f, -1.0f,    0.0f,  1.0f,  0.0f,     0.0f, 0.0f,  // C 20
+            -1.0f, 1.0f, -1.0f,    0.0f,  1.0f,  0.0f,      1.0f, 0.0f,  // D 21
+            -1.0f, 1.0f,  1.0f,     0.0f,  1.0f,  0.0f,     1.0f, 1.0f,  // H 22
+            1.0f,  1.0f,  1.0f,     0.0f,  1.0f,  0.0f,     0.0f, 1.0f,  // G 23
+    };
+    const unsigned int cubeIndices[] = {
+            // front and back
+            0, 3, 2,
+            2, 1, 0,
+            4, 5, 6,
+            6, 7 ,4,
+            // left and right
+            11, 8, 9,
+            9, 10, 11,
+            12, 13, 14,
+            14, 15, 12,
+            // bottom and top
+            16, 17, 18,
+            18, 19, 16,
+            20, 21, 22,
+            22, 23, 20
     };
 
 }

@@ -1,5 +1,5 @@
 #version 410 core
-layout(location = 0) in vec3 a_Pos;
+layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Normal;
 layout(location = 2) in vec2 a_TexCoord;
 
@@ -12,11 +12,13 @@ uniform mat4 v_ModelMatrix;
 uniform mat4 v_ViewMatrix;
 uniform mat4 v_ProjectionMatrix;
 
-out vec3 o_Normal;
-out vec2 o_TexCoord;
+out vec3 Normal;
+out vec2 TexCoord;
+out vec3 FragPos;
 
 void main() {
-    o_Normal = a_Normal;
-    o_TexCoord = a_TexCoord;
-    gl_Position = (v_ProjectionMatrix * v_ViewMatrix * v_ModelMatrix) * vec4(a_Pos, 1.0);
+    TexCoord = a_TexCoord;
+    Normal = mat3(transpose(inverse(v_ModelMatrix))) * a_Normal;
+    FragPos = vec3(v_ModelMatrix * vec4(a_Position, 1.0));
+    gl_Position = (v_ProjectionMatrix * v_ViewMatrix * v_ModelMatrix) * vec4(a_Position, 1.0);
 }

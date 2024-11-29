@@ -8,7 +8,7 @@
 #include <glm/glm.hpp>
 #include "Slate/Scene.h"
 #include "Slate/Ref.h"
-#include "../Context.h"
+#include "Context.h"
 
 #include "yaml-cpp/yaml.h"
 
@@ -36,7 +36,6 @@ namespace Slate {
         void OnResize(float width, float height);
 
         bool firstMouse = true;
-        bool wireFrameEnabled = false;
         float m_CameraBaseSpeed = 5.0f;
     private:
         glm::mat4 m_ProjectionMatrix{};

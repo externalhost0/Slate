@@ -1,12 +1,14 @@
 //
 // Created by Hayden Rivas on 11/1/24.
 //
-
-
 #include "Slate/Shader.h"
 #include "Slate/Files.h"
-
-#include <GL/glew.h>
+#include "Slate/Expect.h"
+#include <glad/glad.h>
+#include <fstream>
+#include <sstream>
+#include <utility>
+#include <iostream>
 
 namespace Slate {
     // basic uniforms
@@ -15,6 +17,7 @@ namespace Slate {
         this->setInt(name, (int) value);
     }
     void Shader::setInt(const char *name, int value) const {
+        // ALWAYS CHECK FOR ERRORS RETARD
         glProgramUniform1i(this->m_ProgramID,GetUniformLocation(name), value);
     }
     void Shader::setFloat(const char *name, float value) const {
@@ -50,13 +53,15 @@ namespace Slate {
         glProgramUniformMatrix4fv(this->m_ProgramID, GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
     }
 
-    Shader::Shader(const std::string& vertexfile, const std::string& fragfile)
-    : m_VertexFile(vertexfile), m_FragmentFile(fragfile)
+    Shader::Shader(std::string name, const std::string& vertexfile, const std::string& fragfile)
+    : m_Name(std::move(name)), m_VertexFile(vertexfile), m_FragmentFile(fragfile)
     {
-        m_ProgramID = Files::generateProgram(vertexfile, fragfile);
+        m_ProgramID = CompileProgram(vertexfile, fragfile);
     }
 
-    void Shader::UseProgram() const { glUseProgram(m_ProgramID); }
+    void Shader::UseProgram() const {
+        glUseProgram(m_ProgramID);
+    }
 
     // getters
     bool Shader::getBool(const char *name) const {
@@ -87,7 +92,7 @@ namespace Slate {
         glGetUniformfv(m_ProgramID, GetUniformLocation(name), values);
         return {values[0], values[1], values[2], values[3]};
     }
-    // performance saving getter
+    // cache locations
     int Shader::GetUniformLocation(const char *name) const {
         if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
             return m_UniformLocationCache[name];
@@ -96,5 +101,73 @@ namespace Slate {
         return location;
     }
 
+    // helper functions for compilation
+    std::string readShaderFile(const std::string& fileName) {
+        const std::string& filePath = fileName;
+        std::ifstream file(filePath);
+        if (!file.is_open()) {
+            printf("ERROR::SHADER::FILE_NOT_FOUND\n");
+            return "";
+        }
+        std::stringstream buffer;
+        buffer << file.rdbuf();
+        if (buffer.str().empty()) {
+            printf("ERROR::SHADER::FILE_IS_EMPTY\n");
+            return "";
+        }
+        return buffer.str();
+    }
+    unsigned int compileShader(unsigned int shadertype, const char *shadersource) {
+        unsigned int shader = glCreateShader(shadertype);
+        glShaderSource(shader, 1, &shadersource, nullptr);
+        glCompileShader(shader);
 
+        int result;
+        char infoLog[256];
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
+        if (!result) {
+            glGetShaderInfoLog(shader, 512, nullptr, infoLog);
+            printf("ERROR::SHADER::%s::COMPILATION_FAILED\n%s\n",
+                   shadertype == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+            glDeleteShader(shader);
+            return 0;
+        }
+        return shader;
+    }
+    unsigned int Shader::CompileProgram(const std::string& vfp, const std::string& ffp) {
+        // shader compilation
+        std::string vertexShaderSource = readShaderFile(vfp);
+        unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource.c_str());
+        std::string fragmentShaderSource = readShaderFile(ffp);
+        unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource.c_str());
+
+        // link shaders
+        unsigned int shaderProgram = glCreateProgram();
+        glAttachShader(shaderProgram, vertexShader);
+        glAttachShader(shaderProgram, fragmentShader);
+
+        glLinkProgram(shaderProgram);
+        glValidateProgram(shaderProgram);
+
+        // check for linking errors
+        int result;
+        char infoLog[256];
+        glGetProgramiv(shaderProgram, GL_LINK_STATUS, &result);
+        // if compile status was not successful
+        if (!result) {
+            glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
+            printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
+            printf("(This is likely an error with how the shader itself is written.)\n");
+            glDeleteShader(vertexShader);
+            glDeleteShader(fragmentShader);
+            glDeleteProgram(shaderProgram);
+            return 1;
+        }
+        // detach, not delete, in case we want to reuse shader ids for other programs
+        glDetachShader(shaderProgram, vertexShader);
+        glDetachShader(shaderProgram, fragmentShader);
+
+
+        return shaderProgram;
+    }
 }

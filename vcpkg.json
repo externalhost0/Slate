@@ -6,9 +6,6 @@
     "name" : "entt",
     "version>=" : "3.14.0"
   }, {
-    "name" : "glew",
-    "version>=" : "2.2.0#4"
-  }, {
     "name" : "glfw3",
     "version>=" : "3.4#1"
   }, {
@@ -33,5 +30,9 @@
   }, {
     "name" : "assimp",
     "version>=" : "5.4.3"
+  }, {
+    "name" : "glad",
+    "version>=" : "0.1.36",
+    "features": [ "gl-api-41" ]
   } ]
 }

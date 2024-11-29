@@ -2,7 +2,7 @@
 // Created by Hayden Rivas on 11/2/24.
 //
 #include "../../external/IconFontCppHeaders/IconsLucide.h"
-
+#include <glad/glad.h>
 #include "imgui.h"
 #include "imgui_internal.h"
 #include "imgui_impl_glfw.h"
@@ -20,14 +20,14 @@
 
 #include "EditorGUI.h"
 #include "Panels/AssetsPanel.h"
-#include "../SettingsWindow.h"
+#include "../Editor.h"
 
 
 namespace Slate {
     void FontSetup() {
         ImGuiIO &io = ImGui::GetIO();
 
-        // font size controls everything
+        // font m_Count controls everything
         float fontSize = 17.0f;
 
         // main font config, for retina displays
@@ -83,33 +83,6 @@ namespace Slate {
         StyleStandard();
     }
 
-    void EditorGUI::ActualWindowUpdate() const {
-       // everything thats not a dedicated panel
-        if (ImGui::BeginMainMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
-                if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {}
-                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
-                if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {}
-                ImGui::Separator();
-                if (ImGui::MenuItem("Settings")) SettingsWindow::SpawnWindow();
-                ImGui::Separator();
-                if (ImGui::MenuItem("Exit", "esc")) glfwSetWindowShouldClose(m_EditorWindow->GetWindow(), true);
-                ImGui::EndMenu();
-            }
-            if (ImGui::BeginMenu("Edit")) {
-                if (ImGui::MenuItem("BLOW UP", "Ctrl+B")) {}
-                ImGui::EndMenu();
-            }
-        }
-        ImGui::EndMainMenuBar();
-
-        // each panel update
-        for (auto& panel : m_Panels) {
-            panel->OnImGuiUpdate();
-        }
-    }
-
     void EditorGUI::OnAttach(const Ref<Context> &context, const Ref<Framebuffer> &framebuffer) {
         // Setup Dear ImGui context
         IMGUI_CHECKVERSION();
@@ -123,16 +96,18 @@ namespace Slate {
         io.ConfigInputTextCursorBlink = true; // enables blinking cursor in text boxes
 #ifdef __APPLE__
         io.ConfigMacOSXBehaviors = true; // changes a ton of stuff, just click on it
-
 #endif
         // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForOpenGL(m_EditorWindow->GetWindow(), false);  // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+        ImGui_ImplGlfw_InitForOpenGL(m_EditorWindow->GetNativeWindow(), false);  // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
         ImGui_ImplOpenGL3_Init("#version 410");
+
 
         m_Panels = { CreateRef<PropertiesPanel>(), CreateRef<ViewportPanel>(framebuffer), CreateRef<ScenePanel>(), CreateRef<AssetsPanel>() };
 
         // apply our style for dear imgui
         InitStyle();
+
+
         /// on attach for all panels
         for (auto& panel : m_Panels) {
             panel->LinkContext(context);
@@ -140,7 +115,36 @@ namespace Slate {
         }
     }
 
-    void EditorGUI::OnUpdate() const {
+    void EditorGUI::ActualWindowUpdate() const {
+        // everything thats not a dedicated panel
+        if (ImGui::BeginMainMenuBar()) {
+            if (ImGui::BeginMenu("File")) {
+                if (ImGui::MenuItem("New Scene", "Ctrl+N")) {}
+                if (ImGui::MenuItem("Open Scene", "Ctrl+O")) {}
+                if (ImGui::MenuItem("Save Scene", "Ctrl+S")) {}
+                if (ImGui::MenuItem("Save Scene As", "Ctrl+Shift+S")) {}
+                ImGui::Separator();
+//                if (ImGui::MenuItem("Settings")) SettingsWindow::SpawnWindow();
+//                ImGui::Separator();
+                if (ImGui::MenuItem("Exit", "esc")) glfwSetWindowShouldClose(m_EditorWindow->GetNativeWindow(), true);
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("Edit")) {
+                if (ImGui::MenuItem("BLOW UP", "Ctrl+B")) {}
+                ImGui::EndMenu();
+            }
+        }
+        ImGui::EndMainMenuBar();
+
+
+        // each panel update
+        for (auto& panel : m_Panels) {
+            panel->OnImGuiUpdate();
+        }
+    }
+
+
+    void EditorGUI::PostDrawUpdate() const {
         // necessary setup
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -148,13 +152,11 @@ namespace Slate {
         // gizmo frame
         ImGuizmo::BeginFrame();
 
-
-
         // below is all dockspace setup
         ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_NoWindowMenuButton; // Config flags for the Dockspace
         ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking;
 
-        // Set the parent window's position, size, and viewport to match that of the main viewport. This is so the parent window
+        // Set the parent window's position, m_Count, and viewport to match that of the main viewport. This is so the parent window
         // completely covers the main viewport, giving it a "full-screen" feel.
         const ImGuiViewport *viewport = ImGui::GetMainViewport();
         ImGui::SetNextWindowPos(viewport->WorkPos);
@@ -169,22 +171,28 @@ namespace Slate {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f); // No corner rounding on the window
         ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f); // No border around the window
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f)); // remove window padding for "fullscreen" effect
+
+        // opening call to dockspace, matches with postDrawUpdate
         ImGui::Begin("DockSpace Main", nullptr, window_flags);
-        {
-            ImGui::PopStyleVar(3); // pop previous styles, (padding, rounding, size)
+        ImGui::PopStyleVar(3); // pop previous styles, (padding, rounding, m_Count)
 
-            // check if docking is enabled in io, it NEEDS to be!!:
-            ImGuiIO &io = ImGui::GetIO();
-            if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-                // The GetID() function is to give a unique identifier to the Dockspace - here, it's "MyDockSpace".
-                ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-                ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-            } else std::cerr << "Docking needs to be enabled in the io Flags!!" << std::endl;
+        // check if docking is enabled in io, it NEEDS to be!!:
+        ImGuiIO &io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
+            // The GetID() function is to give a unique identifier to the Dockspace - here, it's "MyDockSpace".
+            ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
+            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
+        } else std::cerr << "Docking needs to be enabled in the io Flags!!" << std::endl;
 
-            // now let's do the actual stuff below
-            ActualWindowUpdate();
-        }
+        // now let's do the actual stuff below
+        ActualWindowUpdate();
         ImGui::End();
+    }
+
+    void EditorGUI::OnDetach() const {
+        for (auto& panel : m_Panels) {
+            panel->OnDetach();
+        }
     }
 
     void EditorGUI::DrawFinish() const {
@@ -192,10 +200,8 @@ namespace Slate {
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
-    void EditorGUI::OnDetach() {
-        for (auto& panel : m_Panels) {
-            panel->OnDetach();
-        }
+    EditorGUI::EditorGUI() {
+        m_EditorWindow = &Editor::GetEditorWindow();
     }
 
 }

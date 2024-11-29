@@ -13,9 +13,6 @@ namespace Slate {
         void OnImGuiUpdate() override;
         void OnDetach() override;
         void IndependentInput() override;
-
-
-
     public:
         PropertiesPanel() = default;
     };

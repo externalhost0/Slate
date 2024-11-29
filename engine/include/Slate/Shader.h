@@ -12,16 +12,21 @@
 #include <glm/mat4x4.hpp>
 #include <unordered_map>
 
+#include "Ref.h"
+
 namespace Slate {
     class Shader {
     public:
-        Shader() = default;
-        ~Shader() = default;
-        Shader(const std::string& vertexfile, const std::string& fragfile);
+        virtual ~Shader() = default;
+        // implement create api when vulkan is added
+        Shader(std::string name, const std::string& vertexfile, const std::string& fragfile);
 
         // exactly what it sounds like
         void UseProgram() const;
-        unsigned int GetProgramIDCopy() const { return m_ProgramID; }
+        unsigned int GetProgramIDCopy() const { return m_ProgramID; };
+
+        const std::string& GetName() const { return m_Name; };
+
         // uniform setter methods
         void setBool(const char* name, bool value) const;
         void setInt(const char* name, int value) const;
@@ -47,6 +52,8 @@ namespace Slate {
         std::string m_VertexFile;
         std::string m_FragmentFile;
     private:
+        std::string m_Name;
+        unsigned int CompileProgram(const std::string& vfp, const std::string& ffp);
         int GetUniformLocation(const char* name) const;
         mutable std::unordered_map<const char*, int> m_UniformLocationCache;
         unsigned int m_ProgramID{}; // acts like an id for shaders? should i use an independent integar variable for that?

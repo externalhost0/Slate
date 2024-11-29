@@ -17,18 +17,18 @@ add_library(${PROJECT_NAME}
         src/Mesh.cpp
         src/Shader.cpp
 
-        src/ECS/ModelComponent.cpp
-        src/ECS/Entity.cpp
-        src/ECS/UUID.cpp
+        src/ModelComponent.cpp
+        src/Entity.cpp
+        src/UUID.cpp
+        src/ShaderManager.cpp
+        src/Application.cpp
 )
 
-
 # packages
-find_package(GLEW REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
-
+find_package(glad CONFIG REQUIRED)
 
 # include and link it
 target_include_directories(${PROJECT_NAME}
@@ -37,13 +37,12 @@ target_include_directories(${PROJECT_NAME}
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         PRIVATE
             glm::glm
-            glfw
             EnTT::EnTT
 )
 target_link_libraries(${PROJECT_NAME}
         PRIVATE
             glm::glm
             glfw
-            GLEW::GLEW
+            glad::glad
             EnTT::EnTT
 )

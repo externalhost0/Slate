@@ -39,17 +39,15 @@ namespace Slate {
         // so.. small bug where shader is shared between primitive comp and model comp so these view and proj are set on startup
         // figure a way to cache and store shaders so that we dont accidently set shaders across different components
         // look up uniform buffer objects or ssbo
-        auto viewer = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<PrimitiveComponent>();
+        auto viewer = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, MeshComponent>();
         for (auto id : viewer) {
             Entity entity {id, m_ActiveContext->m_ActiveScene};
-            entity.GetComponent<PrimitiveComponent>().m_Shader.setMat4("v_ViewMatrix", m_ViewMatrix);
-            entity.GetComponent<PrimitiveComponent>().m_Shader.setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
-        }
-        auto viewer2 = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<ModelComponent>();
-        for (auto id : viewer2) {
-            Entity entity {id, m_ActiveContext->m_ActiveScene};
-            entity.GetComponent<ModelComponent>().m_Shader.setMat4("v_ViewMatrix", m_ViewMatrix);
-            entity.GetComponent<ModelComponent>().m_Shader.setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+            Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ViewMatrix", m_ViewMatrix);
+            Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+            Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setVec3("v_ViewPos",  m_CameraPosition.x, m_CameraPosition.y, m_CameraPosition.z);
+
+            Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ViewMatrix", m_ViewMatrix);
+            Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
         }
     }
 
@@ -126,11 +124,11 @@ namespace Slate {
         MouseUpdate();
 
         glm::vec3 scaledVector;
-        if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT)) {
+        // sprint function in viewport camera
+        if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
             m_CameraActualSpeed = m_CameraBaseSpeed * SPRINT_MULTIPLIER;
-        } else {
+        else
             m_CameraActualSpeed = m_CameraBaseSpeed;
-        }
         float adjustedSpeed = m_CameraActualSpeed * (float) Time::GetDeltaTime();
 
         if (Input::IsKeyPressed(GLFW_KEY_W))

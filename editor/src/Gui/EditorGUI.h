@@ -10,26 +10,25 @@
 
 #include "Panels/Panel.h"
 #include "Framebuffer.h"
-#include "../EditorWindow.h"
+#include "../Window/Window.h"
 #include "../Context.h"
 
 namespace Slate {
     class EditorGUI {
     public:
-
-        explicit EditorGUI(Ref<EditorWindow> window) : m_EditorWindow(std::move(window)) {}
+        EditorGUI();
         ~EditorGUI() = default;
 
         void OnAttach(const Ref<Context> &context, const Ref<Framebuffer> &framebuffer);
-        void OnUpdate() const;
-        void ActualWindowUpdate() const;
+        void OnDetach() const;
+
+        void PostDrawUpdate() const;
         void DrawFinish() const;
-        void OnDetach();
-
-
     private:
+        void ActualWindowUpdate() const;
+
         Ref<Framebuffer> m_Framebuffer;
-        Ref<EditorWindow> m_EditorWindow;
+        Window* m_EditorWindow;
         std::vector<Ref<Panel>> m_Panels;
     };
 

@@ -3,14 +3,13 @@
 //
 #ifndef SLATE_COMPONENTS_H
 #define SLATE_COMPONENTS_H
-
 // my own header files
-#include "Files.h"
+#include "Renderer.h"
 #include "Mesh.h"
 #include "Primitives.h"
 #include "UUID.h"
 #include "Shader.h"
-
+// not my own
 #include <glm/glm.hpp>
 #include <string>
 #include <typeindex>
@@ -20,72 +19,71 @@
 #include <glm/gtx/quaternion.hpp>
 
 
-
-// remember components should only have ui manipulated or presented elements!!
+// remember components should only be written if they have ui manipulated or presented elements!!
 namespace Slate {
-    // MESH COMPONENT IS IN TWO SEPERATE COMPONENTS
+
     class MeshComponent {
     public:
-        bool m_IsZScalable{false};
+        bool m_IsZScalable{true};
         std::string m_ShapeName{"Unnamed Mesh"};
-        // every mesh requires a shader to even be shown, this is the error shader if none is recieved ??
-        Shader m_Shader;
-    };
-
-    // FOR PRE-DEFINED MESHES
-    struct PrimitiveComponent : public MeshComponent {
-        Mesh m_Mesh;
-        // STATIC
-        PrimitiveComponent(const Shader& ishader, const float *verts, size_t vertCount, const unsigned int *indices, size_t indiceCount, bool i2D, const std::string& iname)
-        : m_Mesh(verts, vertCount, indices, indiceCount)
-        {
-            this->m_Shader = ishader;
-            this->m_IsZScalable = i2D;
-            this->m_ShapeName = iname;
-        }
-    };
-    // FOR USER IMPORTED MESHES
-    struct ModelComponent : public MeshComponent {
-        std::vector<Mesh> m_Meshes;
+        std::string m_ShaderName{"Unnamed Shader"};
         std::string m_Directory;
-        // DYNAMIC
-        ModelComponent(const Shader& ishader, const std::string& filePath, bool i2D, const std::string& iname)
-        : m_Directory(filePath)
-        {
-            this->m_Shader = ishader;
-            this->m_IsZScalable = i2D;
-            this->m_ShapeName = iname;
+        std::vector<Mesh> m_Meshes;
+    public:
+        // every mesh requires a shader to even be shown, this is the error shader if none is recieved ??
+        Ref<Shader> GetMeshShader() const { return Renderer::GetShaderManager().Get(m_ShaderName); };
 
-            m_Directory = filePath;
-            // construction and assignment for m_Meshes
+        // 3 types of constructors:
+        MeshComponent(std::string shadername, std::string shapename, bool i2D, const Vertices& vertices, const Elements& elements)
+        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsZScalable(i2D)
+        {
+            // standard layout for most things, could add more data if necessary
+            LayoutBuffer standardlayout = {
+                    {ShaderDataType::Float3, "a_Position"},
+                    {ShaderDataType::Float3, "a_Normal"},
+                    {ShaderDataType::Float2, "a_TexCoord"}
+            };
+            m_Meshes.emplace_back(vertices, elements, standardlayout);
+        }
+
+        // imported
+        MeshComponent(std::string shaderName, std::string name, bool i2D, const std::string& filePath)
+        : m_ShaderName(std::move(shaderName)), m_ShapeName(std::move(name)), m_IsZScalable(i2D),
+        m_Directory(filePath)
+        {
             loadModel(filePath);
         }
     private:
-        // functions that occur in the constructor
         void loadModel(const std::string& path);
         void processNode(aiNode *node, const aiScene *scene);
         Mesh processMesh(aiMesh *mesh, const aiScene *scene);
     };
 
+    struct MeshCube : MeshComponent {
+        // for adding via component call
+        MeshCube() : MeshCube("null") {}
+        explicit MeshCube(const std::string& shaderName)
+        : MeshComponent(shaderName, "Cube", false,
+                {cubeVertices, sizeof (cubeVertices)},
+                {cubeIndices, sizeof (cubeIndices)}
+        ) {}
+    };
+    struct MeshPlane : MeshComponent {
+        // for adding via component call
+        MeshPlane() : MeshPlane("null") {}
+        explicit MeshPlane(const std::string& shaderName)
+        : MeshComponent(shaderName, "Plane", false,
+                {planeVertices, sizeof (planeVertices)},
+                {planeIndices, sizeof (planeIndices)}
+        ) {}
+    };
 
-    // some mesh primitives i supply to the editor by default
-    struct MeshCube : PrimitiveComponent {
-        // for adding via component call
-        MeshCube() : MeshCube(Shader("../editor/assets/shaders/static.vert", "../editor/assets/shaders/basic.frag")) {}
-        explicit MeshCube(const Shader& shader)
-        : PrimitiveComponent(shader, cubeVertices, 64, cubeIndices, 36, false, "Cube") {}
-    };
-    struct MeshPlane : PrimitiveComponent {
-        // for adding via component call
-        MeshPlane() : MeshPlane(Shader("../editor/assets/shaders/static.vert", "../editor/assets/shaders/basic.frag")) {}
-        explicit MeshPlane(const Shader& shader)
-        : PrimitiveComponent(shader, planeVertices, 32, planeIndices, 6, true, "Plane") {}
-    };
     // the way we import meshes is this
-    struct MeshImport : ModelComponent {
-        explicit MeshImport(const std::string& filePath) : MeshImport(Shader("../editor/assets/shaders/static.vert", "../editor/assets/shaders/basic.frag"), filePath) {}
-        MeshImport(const Shader& shader, const std::string& filePath)
-        : ModelComponent(shader, filePath, false, "Object") {}
+    struct MeshImport : MeshComponent {
+        // for adding via component call???
+        explicit MeshImport(const std::string& filePath) : MeshImport("null", filePath) {}
+        MeshImport(const std::string& shaderName, const std::string& filePath)
+        : MeshComponent(shaderName, "Object", false, filePath) {}
     };
 
 
@@ -126,6 +124,6 @@ namespace Slate {
 
     template<typename... Component>
     struct ComponentGroup{};
-    using AllComponents = ComponentGroup<TransformComponent, PrimitiveComponent, ModelComponent, ScriptComponent>;
+    using AllComponents = ComponentGroup<TransformComponent, MeshComponent, ScriptComponent>;
 }
 #endif //SLATE_COMPONENTS_H

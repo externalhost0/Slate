@@ -1,7 +1,9 @@
 //
 // Created by Hayden Rivas on 11/10/24.
 //
-#include <GL/glew.h>
+
+#include <glad/glad.h>
+
 #include <glm/vec2.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../../../external/IconFontCppHeaders/IconsLucide.h"
@@ -10,20 +12,21 @@
 #include <Slate/Components.h>
 #include <Slate/Input.h>
 #include <Slate/Renderer.h>
+#include <Slate/Scope.h>
 
 #include <fstream>
 
 #include "../Fonts.h"
 #include "../ImGuiSnippets.h"
 #include "ViewportPanel.h"
+
 namespace Slate {
+    // post processing for view modes
+    Scope<Mesh> screenMesh;
+    Scope<Shader> depthShader;
+    Scope<Shader> outlineShader;
 
-    unsigned int depthShader;
-    unsigned int outlineShader;
-
-    unsigned int screenVAO;
     YAML::Node configfile;
-
     void ViewportPanel::OnAttach() {
         configfile = YAML::LoadFile("../editor/config.yaml");
         auto cameranode = configfile["camera"];
@@ -37,15 +40,15 @@ namespace Slate {
             fbSpec.Height = 720;
             m_PostProcessFramebuffer = CreateRef<Framebuffer>(fbSpec);
 
-            Renderer::GenerateVertexArray(screenVAO);
-            Renderer::BindVertexArray(screenVAO);
-            Renderer::BindBufferWithTexture(quadVertices, sizeof(quadVertices), quadIndices, sizeof(quadIndices));
-
             // some shaders we use to visualize in the viewport, rn just depth and outline
-            depthShader = Files::generateProgram("../editor/assets/shaders/screen.vert","../editor/assets/shaders/linearize_depth.frag");
-            outlineShader = Files::generateProgram("../editor/assets/shaders/screen.vert", "../editor/assets/shaders/outline_depth.frag");
+//            outlineShader = ("../editor/assets/shaders/screen.vert", "../editor/assets/shaders/outline_depth.frag");
+            LayoutBuffer screenlayout = {
+                    { ShaderDataType::Float2, "a_Pos" },
+                    { ShaderDataType::Float2, "a_TexCoord" }
+            };
+            screenMesh = CreateScope<Mesh>(Vertices{quadVertices, sizeof (quadVertices)}, Elements{quadIndices, sizeof (quadIndices)}, screenlayout);
+            depthShader = CreateScope<Shader>("DepthFullscreen", "../editor/assets/shaders/screen.vert","../editor/assets/shaders/linearize_depth.frag");
         }
-
     }
 
     bool ViewportPanel::IsInViewportBounds() {
@@ -121,14 +124,19 @@ namespace Slate {
                 // camera menu
                 if (ImGui::BeginMenu(ICON_LC_VIDEO" Camera")) {
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(1, 1));
-                    ImGui::Checkbox("Wireframe Mode", &m_ViewportCamera->wireFrameEnabled);
-
                     ImGui::PushItemFlag(ImGuiItemFlags_AutoClosePopups, false);
+                    // DISPLAY MODES
                     if (ImGui::BeginMenu("Display Modes")) {
-                        if (ImGui::Selectable("Full Color", m_ViewportMode==ViewportModes::COLOR))
-                            m_ViewportMode = ViewportModes::COLOR;
+                        if (ImGui::Selectable("Shaded", m_ViewportMode==ViewportModes::SHADED))
+                            m_ViewportMode = ViewportModes::SHADED;
+                        if (ImGui::Selectable("Unshaded NW", m_ViewportMode==ViewportModes::UNSHADED))
+                            m_ViewportMode = ViewportModes::UNSHADED;
                         if (ImGui::Selectable("Depth", m_ViewportMode==ViewportModes::DEPTH))
                             m_ViewportMode = ViewportModes::DEPTH;
+                        if (ImGui::Selectable("Wireframe", m_ViewportMode==ViewportModes::WIREFRAME))
+                            m_ViewportMode = ViewportModes::WIREFRAME;
+                        if (ImGui::Selectable("Wireframe Color", m_ViewportMode==ViewportModes::SHADED_WIREFRAME))
+                            m_ViewportMode = ViewportModes::SHADED_WIREFRAME;
                         ImGui::EndMenu();
                     }
                     ImGui::PopItemFlag();
@@ -211,35 +219,43 @@ namespace Slate {
                 m_ViewportBounds[1] = {viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y};
             }
 
-
-
             // menu that determines what viewport buffer should be shown
             uint64_t textureID;
             switch (m_ViewportMode) {
                 case ViewportModes::DEPTH: {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-                    glUseProgram(depthShader);
-                    glUniform1f(glGetUniformLocation(depthShader, "u_Near"), m_ViewportCamera->m_ZNear);
-                    glUniform1f(glGetUniformLocation(depthShader, "u_Far"), m_ViewportCamera->m_ZFar);
-                    glUniform1f(glGetUniformLocation(depthShader, "u_Gamma"), 2.2f);
+                    depthShader->UseProgram();
+                    depthShader->setFloat("u_Near", m_ViewportCamera->m_ZNear);
+                    depthShader->setFloat("u_Far", m_ViewportCamera->m_ZFar);
+                    depthShader->setFloat("u_Gamma", 2.2f);
 
                     // will linearize the depth attachment and adjust it via gamma, it's easier to see!
                     uint32_t rawDepthAttachment = m_Framebuffer->GetDepthAttachmentRendererID();
                     glActiveTexture(GL_TEXTURE0);
                     glBindTexture(GL_TEXTURE_2D, rawDepthAttachment);
-                    glUniform1i(glGetUniformLocation(depthShader, "u_DepthTexture"), 0);
+                    depthShader->setInt("u_DepthTexture", 0);
 
                     // do the fullscreen rendering
-                    if (m_ViewportCamera->wireFrameEnabled) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                     m_PostProcessFramebuffer->Bind();
-                    Renderer::BindVertexArray(screenVAO);
-                    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-                    Renderer::UnbindVertexArray();
+                    screenMesh->DrawMesh();
                     m_PostProcessFramebuffer->Unbind();
-                    if (m_ViewportCamera->wireFrameEnabled) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
                     // now get the result and set it to be our textureID
                     textureID = m_PostProcessFramebuffer->GetColorAttachmentRendererID();
+                    m_ActiveContext->m_ShaderMode = SHADERMODE::SOLIDWHITE;
+                    break;
+                }
+                case ViewportModes::WIREFRAME: {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                    textureID = m_Framebuffer->GetColorAttachmentRendererID();
+                    m_ActiveContext->m_ShaderMode = SHADERMODE::SOLIDWHITE;
+                    break;
+                }
+                case ViewportModes::SHADED_WIREFRAME : {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+                    textureID = m_Framebuffer->GetColorAttachmentRendererID();
+                    m_ActiveContext->m_ShaderMode = SHADERMODE::STANDARD;
                     break;
                 }
                 default:
@@ -265,7 +281,6 @@ namespace Slate {
                         glUniform1i(glGetUniformLocation(outlineShader, "u_EntityID"), (int)(entt::entity) m_ActiveContext->m_ActiveEntity);
 
 
-
                         if (m_ViewportCamera->wireFrameEnabled) glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
                         m_PostProcessFramebuffer->Bind();
                         Renderer::BindVertexArray(screenVAO);
@@ -276,22 +291,21 @@ namespace Slate {
 
                         textureID = m_PostProcessFramebuffer->GetColorAttachmentRendererID();*/
                         // get the 0th (standard) color buffer and send it right away to the image
-                        textureID = m_Framebuffer->GetColorAttachmentRendererID();
 
+
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    textureID = m_Framebuffer->GetColorAttachmentRendererID();
+                    m_ActiveContext->m_ShaderMode = SHADERMODE::STANDARD;
                     break;
             }
 
-            if (m_ViewportCamera->wireFrameEnabled) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-            else glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-
+            // viewport image
             ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-            if (m_ViewportSize != *((glm::vec2*)&viewportPanelSize)) {
-                m_Framebuffer->Resize((uint32_t) viewportPanelSize.x, (uint32_t) viewportPanelSize.y);
+            if (m_ViewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x > 0.0f && viewportPanelSize.y > 0.0f) {
                 m_ViewportCamera->OnResize(viewportPanelSize.x, viewportPanelSize.y);
+                m_Framebuffer->Resize((uint32_t) viewportPanelSize.x, (uint32_t) viewportPanelSize.y);
                 m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
             }
-            // viewport image
             ImGui::Image(reinterpret_cast<void *>(textureID), ImVec2{m_ViewportSize.x, m_ViewportSize.y},ImVec2{0, 1}, ImVec2{1, 0});
 
             // overlay debug menu

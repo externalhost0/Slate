@@ -9,23 +9,23 @@ set(CMAKE_CXX_STANDARD 17)
 add_subdirectory(engine)
 
 add_executable(${PROJECT_NAME}
-
         editor/src/main.cpp
         editor/src/Editor.cpp
         editor/src/EditorLayer.cpp
-        editor/src/EditorWindow.cpp
-        editor/src/SettingsWindow.cpp
+        editor/src/ViewportCamera.cpp
 
-        editor/src/GUI/EditorGUI.cpp
-        editor/src/GUI/Framebuffer.cpp
-        editor/src/GUI/ImGuiStyles.cpp
-        editor/src/GUI/ViewportCamera.cpp
-        editor/src/GUI/ImGuiSnippets.cpp
+        editor/src/Window/Window.cpp
+        editor/src/Window/SettingsWindow.cpp
 
-        editor/src/GUI/Panels/AssetsPanel.cpp
-        editor/src/GUI/Panels/PropertiesPanel.cpp
-        editor/src/GUI/Panels/ScenePanel.cpp
-        editor/src/GUI/Panels/ViewportPanel.cpp
+        editor/src/Gui/EditorGUI.cpp
+        editor/src/Gui/Framebuffer.cpp
+        editor/src/Gui/ImGuiStyles.cpp
+        editor/src/Gui/ImGuiSnippets.cpp
+
+        editor/src/Gui/Panels/AssetsPanel.cpp
+        editor/src/Gui/Panels/PropertiesPanel.cpp
+        editor/src/Gui/Panels/ScenePanel.cpp
+        editor/src/Gui/Panels/ViewportPanel.cpp
 )
 find_package(yaml-cpp CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
@@ -54,8 +54,10 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # packing setup
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
-#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/license.txt")
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+set(CPACK_PACKAGE_VENDOR "Hayden Rivas")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.txt")
 set(CPACK_PACKAGE_VERSION_MAJOR "${PROJECT_VERSION_MAJOR}")
 set(CPACK_PACKAGE_VERSION_MINOR "${PROJECT_VERSION_MINOR}")
 include(CPack)

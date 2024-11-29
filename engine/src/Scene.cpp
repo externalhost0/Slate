@@ -4,10 +4,8 @@
 
 // be careful when including components
 #include "Slate/Components.h"
-
 #include "Slate/Scene.h"
 #include "Slate/Entity.h"
-
 
 namespace Slate {
 
@@ -82,15 +80,11 @@ namespace Slate {
 
     }
     template<>
-    void Scene::OnComponentAdded<PrimitiveComponent>(Entity entity, PrimitiveComponent& component)
+    void Scene::OnComponentAdded<MeshComponent>(Entity entity, MeshComponent& component)
     {
 
     }
-    template<>
-    void Scene::OnComponentAdded<ModelComponent>(Entity entity, ModelComponent& component)
-    {
 
-    }
     template<>
     void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
     {

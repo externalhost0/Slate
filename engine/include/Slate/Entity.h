@@ -11,10 +11,7 @@
 
 #include "UUID.h"
 #include "Scene.h"
-
-// lets find a better way of doing this later
-// maybe putting it in its own class
-#include "../../src/errors.h"
+#include "Expect.h"
 
 namespace Slate {
     class Entity {

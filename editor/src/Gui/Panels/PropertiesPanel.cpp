@@ -1,7 +1,7 @@
 //
 // Created by Hayden Rivas on 11/10/24.
 //
-#include <GL/glew.h>
+#include <glad/glad.h>
 #include "../../../external/IconFontCppHeaders/IconsLucide.h"
 
 #include <Slate/Components.h>
@@ -75,19 +75,17 @@ namespace Slate {
     }
 
     // uniforms directly set by the editor ONLY
-    const char* unedit_uniforms[] = { "v_EntityID", "v_ProjectionMatrix", "v_ViewMatrix", "v_ModelMatrix" };
-    // because there are two types of meshes you can attach, we reuse gui logic for them both
-    template<typename ComponentType>
-    void ComponentMeshBase(Entity* entity) {
+    const char* unedit_uniforms[] = { "v_EntityID", "v_ProjectionMatrix", "v_ViewMatrix", "v_ModelMatrix", "v_ViewPos" };
+    void ComponentMesh(Entity* entity) {
         ImGui::PushFont(Fonts::boldFont);
         ImGui::Text("Mesh Specifications: ");
         ImGui::PopFont();
         ImGui::Separator();
 
-        auto &mesh = entity->GetComponent<ComponentType>();
-        if (entity->HasComponent<ModelComponent>()) {
+        auto &mesh = entity->GetComponent<MeshComponent>();
+        if (entity->HasComponent<MeshComponent>()) {
             ImGui::Text("%s", mesh.m_ShapeName.c_str());
-            ImGui::Text("%s", entity->GetComponent<ModelComponent>().m_Directory.c_str());
+            ImGui::Text("%s", entity->GetComponent<MeshComponent>().m_Directory.c_str());
         } else {
             ImGui::Text("%s", mesh.m_ShapeName.c_str());
         }
@@ -102,21 +100,22 @@ namespace Slate {
         ImGui::PopFont();
         float indent = 50.0f;
         ImGui::Indent(indent);
-        ImGui::Text("%s", mesh.m_Shader.m_VertexFile.c_str());
-        ImGui::Text("%s", mesh.m_Shader.m_FragmentFile.c_str());
+        auto& shader = *entity->GetComponent<MeshComponent>().GetMeshShader();
+        ImGui::Text("%s", shader.m_VertexFile.c_str());
+        ImGui::Text("%s", shader.m_FragmentFile.c_str());
         ImGui::Unindent(indent);
 
         // - - - - - - - - //
 
         // for every uniform display it correctly
         GLint count;
-        unsigned int progID = mesh.m_Shader.GetProgramIDCopy();
+        unsigned int progID = shader.GetProgramIDCopy();
         glGetProgramiv(progID, GL_ACTIVE_UNIFORMS, &count);
 
         ImGui::Text("Available Uniforms:");
         for (GLint i = 0; i < count; i++) {
             char name[128];
-            GLint size; // size of the variable
+            GLint size; // m_Count of the variable
             GLenum type; // type of the variable (float, vec3 or mat4, etc)
             GLsizei length; // name length
             glGetActiveUniform(progID, (GLuint) i, sizeof (name), &length, &size, &type, name);
@@ -130,7 +129,7 @@ namespace Slate {
             }
             if (isUneditable) continue;
 
-            ImGui::PushID(typeid(ComponentType).hash_code() + (int)(uint64_t)entity->GetUUID());
+            ImGui::PushID(typeid(MeshComponent).hash_code() + (int)(uint64_t)entity->GetUUID());
             ImGui::Text("%s : %s", getUniformTypeName(type).c_str(), name);
             ImGui::SameLine();
 
@@ -138,7 +137,7 @@ namespace Slate {
             // most common types of user defined uniforms
             if (type == GL_FLOAT_VEC4) {
                 float val[4];
-                glm::vec4 uniform = entity->GetComponent<ComponentType>().m_Shader.getVec4(name);
+                glm::vec4 uniform = shader.getVec4(name);
                 val[0] = uniform.r;
                 val[1] = uniform.g;
                 val[2] = uniform.b;
@@ -148,13 +147,13 @@ namespace Slate {
                 if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
                     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
                     ImGui::ColorPicker4("##picker", val);
-                    entity->GetComponent<ComponentType>().m_Shader.setVec4(name, val[0], val[1], val[2], val[3]);
+                    shader.setVec4(name, val[0], val[1], val[2], val[3]);
                     ImGui::EndPopup();
                 }
             }
             else if (type == GL_FLOAT_VEC3) {
                 float val[3];
-                glm::vec3 uniform = entity->GetComponent<ComponentType>().m_Shader.getVec3(name);
+                glm::vec3 uniform = shader.getVec3(name);
                 val[0] = uniform.r;
                 val[1] = uniform.g;
                 val[2] = uniform.b;
@@ -163,48 +162,42 @@ namespace Slate {
                 if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
                     if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
                     ImGui::ColorPicker3("##picker", val);
-                    entity->GetComponent<ComponentType>().m_Shader.setVec3(name, val[0], val[1], val[2]);
+                    shader.setVec3(name, val[0], val[1], val[2]);
                     ImGui::EndPopup();
                 }
             }
             else if (type == GL_FLOAT_VEC2) {
                 float val[2];
-                glm::vec2 uniform = entity->GetComponent<ComponentType>().m_Shader.getVe2(name);
+                glm::vec2 uniform = shader.getVe2(name);
                 val[0] = uniform.x;
                 val[1] = uniform.y;
                 ImGui::DragFloat2("Vector 2", val, fspeed);
-                entity->GetComponent<ComponentType>().m_Shader.setVec2(name, val[0], val[1]);
+                shader.setVec2(name, val[0], val[1]);
             }
             else if (type == GL_FLOAT) {
-                float val = entity->GetComponent<ComponentType>().m_Shader.getFloat(name);
+                float val = shader.getFloat(name);
                 ImGui::DragFloat("Float", &val, fspeed);
-                entity->GetComponent<ComponentType>().m_Shader.setFloat(name, val);
+                shader.setFloat(name, val);
             }
             else if (type == GL_INT) {
-                int val = entity->GetComponent<ComponentType>().m_Shader.getInt(name);
+                int val = shader.getInt(name);
                 ImGui::DragInt("Integar", &val);
-                entity->GetComponent<ComponentType>().m_Shader.setInt(name, val);
+                shader.setInt(name, val);
             }
             else if (type == GL_BOOL) {
-                bool val = entity->GetComponent<ComponentType>().m_Shader.getBool(name);
+                bool val = shader.getBool(name);
                 ImGui::Checkbox("Boolean", &val);
-                entity->GetComponent<ComponentType>().m_Shader.setBool(name, val);
+                shader.setBool(name, val);
             }
             else if (type)
 
 
-            ImGui::NewLine();
+                ImGui::NewLine();
             ImGui::PopID();
         }
 
     }
 
-    void ComponentPrimitive(Entity* entity) {
-        ComponentMeshBase<PrimitiveComponent>(entity);
-    }
-    void ComponentModel(Entity* entity) {
-        ComponentMeshBase<ModelComponent>(entity);
-    }
 
     void ComponentScript(Entity* entty) {
         ImGui::Text("script");
@@ -212,29 +205,28 @@ namespace Slate {
 
 
     void PropertiesPanel::OnAttach() {
+
+
     }
 
     using ComponentEntry = std::pair<const char*, std::type_index>;
-    // make sure you update the size of the array
-    std::array<ComponentEntry, 4> componentEntries = {{
+    // make sure you update the m_Count of the array
+    std::array<ComponentEntry, 3> componentEntries = {{
         {"Transform", typeid(TransformComponent)},
         {"Script", typeid(ScriptComponent)},
-        {"Primitive", typeid(PrimitiveComponent)},
-        {"Model", typeid(ModelComponent)}
+        {"Mesh", typeid(MeshComponent)}
     }};
     // later i want the mesh components to be empty by default
     // the defauly action upon adding a new component to your entity
     std::unordered_map<std::type_index, std::function<void(Context*)>> componentActions = {
             {typeid(TransformComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<TransformComponent>(); }},
             {typeid(ScriptComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<ScriptComponent>(); }},
-            {typeid(PrimitiveComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<PrimitiveComponent>(MeshCube()); }},
-            {typeid(ModelComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<ModelComponent>(MeshImport("../editor/assets/models/icosphere.obj")); }}
+            {typeid(MeshComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<MeshComponent>(MeshCube()); }},
     };
     std::unordered_map<std::type_index, std::function<bool(Context*)>> componentCheckers = {
             {typeid(TransformComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<TransformComponent>(); }},
             {typeid(ScriptComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<ScriptComponent>(); }},
-            {typeid(PrimitiveComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<PrimitiveComponent>(); }},
-            {typeid(ModelComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<ModelComponent>(); }}
+            {typeid(MeshComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<MeshComponent>(); }},
     };
 
 
@@ -253,8 +245,7 @@ namespace Slate {
             // now each component will be listed below if available
             ComponentPropertyPanel<TransformComponent>(entity, ComponentTransformation, "Transform", ICON_LC_MOVE_3D);
             ComponentPropertyPanel<ScriptComponent>(entity, ComponentScript, "Script", ICON_LC_SCROLL);
-            ComponentPropertyPanel<PrimitiveComponent>(entity, ComponentPrimitive, "Mesh Primitive", ICON_LC_BLOCKS);
-            ComponentPropertyPanel<ModelComponent>(entity, ComponentModel, "Mesh Model", ICON_LC_BLOCKS);
+            ComponentPropertyPanel<MeshComponent>(entity, ComponentMesh, "Mesh", ICON_LC_BLOCKS);
 
 
             // add component button, also center it

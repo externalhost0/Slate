@@ -5,11 +5,9 @@
 #ifndef SLATE_SCENE_H
 #define SLATE_SCENE_H
 
-#include "UUID.h"
-#include "Components.h"
-
 #include <entt/entt.hpp>
 #include <iostream>
+#include "UUID.h"
 
 namespace Slate {
     // forward declaration, same is done in Entity.h

@@ -10,13 +10,16 @@
 
 #include "Panel.h"
 
-#include "../ViewportCamera.h"
+#include "../../ViewportCamera.h"
 #include "../Framebuffer.h"
 
 namespace Slate {
     enum class ViewportModes {
-        COLOR,
+        SHADED,
+        UNSHADED,
         DEPTH,
+        WIREFRAME,
+        SHADED_WIREFRAME,
     };
     class ViewportPanel : public Panel {
     public:
@@ -32,10 +35,10 @@ namespace Slate {
 
     private:
         bool IsInViewportBounds();
-        Ref<Framebuffer> m_PostProcessFramebuffer;
-        ViewportModes m_ViewportMode = ViewportModes::COLOR;
-        Entity m_HoveredEntity;
         Ref<Framebuffer> m_Framebuffer;
+        Ref<Framebuffer> m_PostProcessFramebuffer;
+        ViewportModes m_ViewportMode = ViewportModes::SHADED;
+        Entity m_HoveredEntity;
         void OnAttach() override;
         void OnImGuiUpdate() override;
         void OnDetach() override;

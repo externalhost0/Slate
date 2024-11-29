@@ -1,27 +1,25 @@
 //
 // Created by Hayden Rivas on 11/5/24.
 //
-#include <GL/glew.h>
+#include <Slate/Components.h>
 #include "EditorLayer.h"
-#include "yaml-cpp/yaml.h"
 
 namespace Slate {
     void EditorLayer::Bootstrap() {
+
         FramebufferSpecification fbSpec;
         // color, entity id, and depth
         fbSpec.Attachments = { FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::Depth };
         fbSpec.Width = 1280;
         fbSpec.Height = 720;
+        fbSpec.Samples = 1;
         m_Framebuffer = CreateRef<Framebuffer>(fbSpec);
 
         m_ActiveContext = CreateRef<Context>();
         m_ActiveContext->m_ActiveScene = new Scene();
         m_ActiveContext->m_ActiveEntity = Entity::Null;
 
-        m_Renderer = CreateRef<Renderer>();
-        m_Renderer->Init();
-
-        m_GUI = new EditorGUI(m_EditorWindow);
+        m_GUI = CreateRef<EditorGUI>();
         m_GUI->OnAttach(m_ActiveContext, m_Framebuffer);
     }
 
@@ -30,9 +28,15 @@ namespace Slate {
         m_GUI->OnDetach();
     }
 
+    void EditorLayer::OnImGuiUpdate() {
+    }
+
+
     void EditorLayer::OnUpdate() {
         // Loop Series
         {
+            // resizing logic needs to be handled first
+
             // PREP
             m_Framebuffer->Bind();
             Renderer::ClearColor();
@@ -40,39 +44,11 @@ namespace Slate {
             Renderer::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             m_Framebuffer->ClearAttachment(1, -1);
 
+
             // ACTION
-            // which is update uniforms and draw every frame
             // - - - - - -
-            // draw primitives
-            for (auto id : m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, PrimitiveComponent>()) {
-                Entity entity{id, m_ActiveContext->m_ActiveScene};
-                // shader update (requires transform, for now)
-                {
-                    auto model = glm::mat4(1.0f);
-                    // transform processing
-                    {
-                        auto &transform = entity.GetComponent<TransformComponent>();
-                        // just translate according to its current position in the component
-                        model = glm::translate(model, glm::vec3(transform.Position.x, transform.Position.y, transform.Position.z));
-
-                        // for proper rotation rendering use quaternions
-                        glm::quat rotationQuat = glm::quat(glm::radians(glm::vec3(transform.Rotation.x, transform.Rotation.y, transform.Rotation.z)));
-                        model = model * glm::mat4_cast(rotationQuat);
-
-                        // if mesh is said to be 2D, make scaling on the Z do nothing
-                        if (entity.GetComponent<PrimitiveComponent>().m_IsZScalable)
-                            model = glm::scale(model, glm::vec3(transform.Scale.x, transform.Scale.y, 0.0f));
-                        else
-                            model = glm::scale(model, glm::vec3(transform.Scale.x, transform.Scale.y, transform.Scale.z));
-                    }
-                    entity.GetComponent<PrimitiveComponent>().m_Shader.setMat4("v_ModelMatrix", model);
-                    entity.GetComponent<PrimitiveComponent>().m_Shader.setInt("v_EntityID", (int) (entt::entity) entity);
-                }
-                entity.GetComponent<PrimitiveComponent>().m_Shader.UseProgram();
-                entity.GetComponent<PrimitiveComponent>().m_Mesh.DrawMesh();
-            }
-            // draw models
-            for (auto id : m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, ModelComponent>()) {
+            // draw meshes, only if they have transform lol
+            for (auto id : m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, MeshComponent>()) {
                 Entity entity{id, m_ActiveContext->m_ActiveScene};
                 // shader update (requires transform, for now)
                 {
@@ -87,22 +63,34 @@ namespace Slate {
                         model = model * glm::mat4_cast(rotationQuat);
 
                         // if mesh is 2D, make scaling on the Z do nothing
-                        if (entity.GetComponent<ModelComponent>().m_IsZScalable) {
+                        if (entity.GetComponent<MeshComponent>().m_IsZScalable)
                             model = glm::scale(model, glm::vec3(transform.Scale.x, transform.Scale.y, 0.0f));
-                        } else {
+                        else
                             model = glm::scale(model, glm::vec3(transform.Scale.x, transform.Scale.y, transform.Scale.z));
-                        }
                     }
-                    entity.GetComponent<ModelComponent>().m_Shader.setMat4("v_ModelMatrix", model);
-                    entity.GetComponent<ModelComponent>().m_Shader.setInt("v_EntityID", (int) (entt::entity) entity);
+                    Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ModelMatrix", model);
+                    Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setInt("v_EntityID", (int)(entt::entity)entity);
+
+                    Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ModelMatrix", model);
+                    Renderer::GetShaderManager().Get("solid_color")->setInt("v_EntityID", (int)(entt::entity)entity);
                 }
-                entity.GetComponent<ModelComponent>().m_Shader.UseProgram();
-                for (const auto& el : entity.GetComponent<ModelComponent>().m_Meshes) {
+                if (m_ActiveContext->m_ShaderMode == SHADERMODE::SOLIDWHITE)
+                    Renderer::GetShaderManager().Get("solid_color")->UseProgram();
+                else
+                    Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->UseProgram();
+
+                for (const auto &el: entity.GetComponent<MeshComponent>().m_Meshes) {
                     el.DrawMesh();
                 }
             }
             // - - - - -
-            m_GUI->OnUpdate(); // ALWAYS DRAW BEFORE GUI, viewport depends on it
+            // ALWAYS DRAW BEFORE Gui, viewport depends on it
+            m_GUI->PostDrawUpdate();
+            GLenum err = glGetError();
+            if (err != GL_NO_ERROR) {
+                std::cerr << "OpenGL Error: " << err << std::endl;
+            }
+
 
             // CLEAN
             m_Framebuffer->Unbind();

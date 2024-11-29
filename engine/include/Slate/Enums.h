@@ -2,8 +2,8 @@
 // Created by Hayden Rivas on 11/11/24.
 //
 
-#ifndef SLATEEDITOR_TYPES_H
-#define SLATEEDITOR_TYPES_H
+#ifndef SLATEEDITOR_ENUMS_H
+#define SLATEEDITOR_ENUMS_H
 
 namespace Slate {
 // editor window modes
@@ -12,6 +12,10 @@ namespace Slate {
         BORDERLESS_FULLSCREEN,
         WINDOWED,
     };
+    enum SHADERMODE {
+        STANDARD,
+        SOLIDWHITE
+    };
 }
 
-#endif //SLATEEDITOR_TYPES_H
+#endif //SLATEEDITOR_ENUMS_H

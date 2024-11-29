@@ -4,7 +4,7 @@
 #include "Editor.h"
 
 int main(int argc, char** argv){
-    // get a slate app
+    // Get a slate app
     Slate::Editor app;
     // Now lets start our app!
     app.Run();

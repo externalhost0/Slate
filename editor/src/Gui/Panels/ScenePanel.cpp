@@ -125,8 +125,8 @@ namespace Slate {
 
                     if (ImGui::BeginPopup("RenamePopup")) {
                         ImGui::SetKeyboardFocusHere();
-                        // buffer size and actual name
-                        // currently max size name is 64
+                        // buffer m_Count and actual name
+                        // currently max m_Count name is 64
                         char buffer[64] = "";
                         std::string currentName = entity.GetComponent<CoreComponent>().name;
                         strncpy(buffer, currentName.c_str(), sizeof(buffer) - 1);

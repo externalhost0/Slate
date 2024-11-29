@@ -25,7 +25,7 @@ namespace Slate {
             style->FramePadding = ImVec2(10.0f, 4.0f);
             style->TabBarBorderSize = 2.0f;
             style->TabBarOverlineSize = 1.0f;
-            style->WindowBorderSize = 0.0f; // fot the thick borders on everything
+            style->WindowBorderSize = 1.0f; // for the thick borders on everything
             style->PopupBorderSize = 1.0f; // for those nice borders around things like menus
             style->ScrollbarSize = 10.0f;
 

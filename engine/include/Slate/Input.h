@@ -18,7 +18,7 @@ namespace Slate {
         static void SetInputMode(int mode);
         static int GetInputMode();
         // inject window variable
-        static void SetWindow(GLFWwindow& iWindow);
+        static void SetWindow(GLFWwindow* window);
     private:
         inline static GLFWwindow* m_Window;
     };

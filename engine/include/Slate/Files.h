@@ -11,10 +11,8 @@
 namespace Slate {
     class Files {
     public:
-        static unsigned int generateProgram(const std::string& vfp, const std::string& ffp);
     private:
     };
-
 }
 
 #endif //SLATE_FILES_H
