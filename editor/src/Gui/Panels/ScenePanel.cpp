@@ -20,7 +20,8 @@ namespace Slate {
         ImGui::Begin("Scene Hierarchy");
         {
             // if we click on any empty space, unselect the entity
-            if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsWindowHovered())  m_ActiveContext->m_ActiveEntity = Entity::Null;
+            if (ImGui::IsMouseDoubleClicked(0) && ImGui::IsWindowHovered())
+                m_ActiveContext->m_ActiveEntity = Entity::Null;
 
             // scene needs to be choosen!
             if (!m_ActiveContext->m_ActiveScene) {
@@ -31,7 +32,8 @@ namespace Slate {
 
             // right click menu on window
             if (ImGui::BeginPopupContextWindow()) {
-                ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Brighten(ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered), 0.2f));
+                ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
+                                      Brighten(ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered), 0.2f));
                 if (ImGui::Selectable("New Entity"))
                     m_ActiveContext->m_ActiveEntity = m_ActiveContext->m_ActiveScene->CreateEntity("Unnamed Entity");
                 ImGui::PopStyleColor();
@@ -39,7 +41,7 @@ namespace Slate {
             }
             // quick lookups for entity additions and presence in scene
             auto allEntities = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<CoreComponent>();
-            for (auto entityId : allEntities) {
+            for (auto entityId: allEntities) {
                 if (entitySet.find(entityId) == entitySet.end()) {
                     entity_order_vector.push_back(entityId);
                     entitySet.insert(entityId);
@@ -47,21 +49,27 @@ namespace Slate {
             }
 
 
+            int toDeleteIndex = -1;
             // ENTITY LIST
             for (int i = 0; i < entity_order_vector.size(); ++i) {
-                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
+                ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen |
+                                           ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_SpanFullWidth;
                 // from order vector get our entity
-                Entity entity = { entity_order_vector[i], m_ActiveContext->m_ActiveScene};
+                Entity entity = {entity_order_vector[i], m_ActiveContext->m_ActiveScene};
                 // scene panel actual content
                 float ypad = ImGui::GetFontSize() * 0.35f;
-                bool isSelected = entity.operator entt::entity() == m_ActiveContext->m_ActiveEntity.operator entt::entity();
+                bool isSelected =
+                        entity.operator entt::entity() == m_ActiveContext->m_ActiveEntity.operator entt::entity();
                 if (isSelected)
                     flags |= ImGuiTreeNodeFlags_Selected;
 
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, ypad));
                 ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
-                if (isSelected) ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Brighten(ImGui::GetStyleColorVec4(ImGuiCol_Header), 0.035f));
-                ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, " " ICON_LC_BOX "  %s", entity.GetComponent<CoreComponent>().name.c_str());
+                if (isSelected)
+                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
+                                          Brighten(ImGui::GetStyleColorVec4(ImGuiCol_Header), 0.035f));
+                ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) entity, flags, " " ICON_LC_BOX "  %s",
+                                  entity.GetComponent<CoreComponent>().name.c_str());
                 if (isSelected) ImGui::PopStyleColor();
                 ImGui::PopStyleVar(2);
                 // dragging and dropping functionality
@@ -79,19 +87,19 @@ namespace Slate {
                     // determining if we are dropping above or below the hovered item
                     float mouseY = ImGui::GetMousePos().y;
                     bool dropAbove = (mouseY < (itemRectMin.y + itemRect.y * 0.5f));
-                    int insertIndex = dropAbove ? i : i+1;
+                    int insertIndex = dropAbove ? i : i + 1;
 
-                    ImVec2 barStart = dropAbove ? itemRectMin : ImVec2(itemRectMin.x, itemRectMax.y-itemRectMin.y);
+                    ImVec2 barStart = dropAbove ? itemRectMin : ImVec2(itemRectMin.x, itemRectMax.y - itemRectMin.y);
                     // lowkey forgot what this was doing compared to barStart above it
-                    if (i == entity_order_vector.size()-1) {
+                    if (i == entity_order_vector.size() - 1) {
                         barStart = dropAbove ? itemRectMin : ImVec2(itemRectMin.x, itemRectMax.y);
                     }
                     ImVec2 barEnd = ImVec2(itemRectMax.x, barStart.y);
 
-                    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+                    ImDrawList *draw_list = ImGui::GetWindowDrawList();
                     draw_list->AddLine(barStart, barEnd, ImGui::GetColorU32(ImGuiCol_DragDropTarget), 3.0f);
 
-                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("EntityScenePayload")) {
+                    if (const ImGuiPayload *payload = ImGui::AcceptDragDropPayload("EntityScenePayload")) {
                         int payloadIndex = *(const int *) payload->Data;
                         if (payloadIndex != i) {
                             if (payloadIndex < insertIndex) --insertIndex;
@@ -104,8 +112,6 @@ namespace Slate {
                 }
 
 
-
-                bool todelete = false;
                 // on normal click
                 if (ImGui::IsItemClicked())
                     m_ActiveContext->m_ActiveEntity = entity;
@@ -118,7 +124,8 @@ namespace Slate {
                     ImGui::PopFont();
                     ImGui::Separator();
 
-                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered, Brighten(ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered), 0.2f));
+                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
+                                          Brighten(ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered), 0.2f));
                     // rename functionality
                     if (ImGui::Selectable("Rename", false, ImGuiSelectableFlags_DontClosePopups))
                         ImGui::OpenPopup("RenamePopup"); // Open the popup when button is clicked
@@ -150,15 +157,17 @@ namespace Slate {
                     ImGui::Separator();
                     if (ImGui::Selectable("Delete")) {
                         // give entity component which signals its incoming deletion at end of gui update
-                        m_ActiveContext->m_ActiveEntity = Entity::Null;
-                        todelete = true;
+                        toDeleteIndex = i;
                         ImGui::CloseCurrentPopup();
                     }
                     ImGui::PopStyleColor();
                     ImGui::EndPopup();
                 }
-                // delete component as to not interfere with gui rendering
-                if (todelete) m_ActiveContext->m_ActiveScene->DestroyEntity(entity);
+            }
+            if (toDeleteIndex != -1) {
+                m_ActiveContext->m_ActiveEntity = Entity::Null;
+                m_ActiveContext->m_ActiveScene->DestroyEntity(Entity(entity_order_vector[toDeleteIndex] , m_ActiveContext->m_ActiveScene));
+                entity_order_vector.erase(entity_order_vector.begin() + toDeleteIndex);
             }
             // end of list
         }

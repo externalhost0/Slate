@@ -1,8 +1,10 @@
 //
 // Created by Hayden Rivas on 10/30/24.
 //
+#include <glad/glad.h>
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "../external/IconFontCppHeaders/IconsLucide.h"
 
 #include <Slate/Components.h>
 #include <Slate/Entity.h>
@@ -17,6 +19,12 @@ namespace Slate {
     // set of helper functions for error messages
     void glfwErrorCallback(int error_code, const char *description) {EXPECT(error_code, "%s", description)}
     void exitCallback() { printf("Editor Exit Callback!\n"); }
+    void APIENTRY OpenGLDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam) {
+        std::cerr << "OpenGL Debug Message:" << std::endl;
+        std::cerr << "Source: " << source << ", Type: " << type << ", ID: " << id << std::endl;
+        std::cerr << "Severity: " << severity << std::endl;
+        std::cerr << "Message: " << message << std::endl;
+    }
     void setupErrorHandling() {
         glfwSetErrorCallback(glfwErrorCallback);
         atexit(exitCallback);
@@ -24,7 +32,8 @@ namespace Slate {
 
 
     void Editor::Init() {
-        setupErrorHandling();
+        setupErrorHandling(); // placed at beginning arbitarly
+
 
         m_EditorLayer = CreateScope<EditorLayer>();
         // generate the main editor window, createScope builds it
@@ -35,6 +44,7 @@ namespace Slate {
         m_MainWindow = CreateScope<Window>(winspec);
 
         // idk where to put this
+        // or if it should be put anywhere at all
         Renderer::Init();
 
 
@@ -42,13 +52,12 @@ namespace Slate {
         // prefferably through constructors and not functions that are arbitraly called
         m_EditorLayer->Bootstrap();
 
-        // i believe the order should go like this, be open to moving entity creation around
-        // tests scene on startup, make a cube and give it the following components
-
+        // literally just loads some shaders we want the editor to always have access to
         Renderer::GetShaderManager().Setup();
+        // the shader all of these examlpes will be using
         Renderer::GetShaderManager().Load("Basic", "../editor/assets/shaders/static.vert", "../editor/assets/shaders/basic.frag");
-
-         // all of the above does nothing
+        // for editor icons
+        Renderer::GetShaderManager().Load("Icon", "../editor/assets/shaders/static_editor.vert", "../editor/assets/shaders/icon.frag");
 
 
         Entity cube1 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Cube1");
@@ -73,6 +82,11 @@ namespace Slate {
         object2.AddComponent<TransformComponent>(glm::vec3(-3.0f, 0.0f, -5.0f));
         object2.AddComponent<MeshComponent>(MeshImport("Basic", "../editor/assets/models/column.obj"));
 
+        Entity light1 = m_EditorLayer->m_ActiveContext->m_ActiveScene->CreateEntity("Light1");
+        light1.AddComponent<TransformComponent>(glm::vec3(3.0f, 5.0f, -2.0f));
+//        light1.AddComponent<TextComponent>(ICON_LC_LIGHTBULB);
+        light1.AddComponent<LightComponent>(PointLight());
+
         // link imgui callbacks to main editor window
         ImGui_ImplGlfw_InstallCallbacks(m_MainWindow->GetNativeWindow());
     }
@@ -91,7 +105,6 @@ namespace Slate {
     }
 
     void Editor::Shutdown() {
-//        SaveConfig();
         // editor personal shutdown
         m_EditorLayer->OnDetach();
         // imgui shutdown
@@ -104,6 +117,7 @@ namespace Slate {
     }
 
     // most important function ig, this is the cycle order of the program
+    // however has no reason for the user to interfere, as this is universal
     void Editor::Run() {
         Init();
         Loop();

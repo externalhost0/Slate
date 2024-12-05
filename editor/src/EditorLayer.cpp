@@ -21,6 +21,9 @@ namespace Slate {
 
         m_GUI = CreateRef<EditorGUI>();
         m_GUI->OnAttach(m_ActiveContext, m_Framebuffer);
+
+        // ubo assignment, move later
+
     }
 
     void EditorLayer::OnDetach() const {
@@ -39,11 +42,21 @@ namespace Slate {
 
             // PREP
             m_Framebuffer->Bind();
-            Renderer::ClearColor();
-            Renderer::ClearStencil();
-            Renderer::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            m_Framebuffer->ClearAttachment(1, -1);
+            if (m_ActiveContext->m_ShaderMode == SHADERMODE::OVERDRAW) {
+                glEnable(GL_BLEND);
+                glBlendFunc(GL_ONE, GL_ONE); // Additive blending
+                Renderer::ClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+                Renderer::ClearStencil();
+                Renderer::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+            } else {
+                glDisable(GL_BLEND);
+                Renderer::ClearColor();
+                Renderer::ClearStencil();
+                Renderer::Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+
+            }
+            m_Framebuffer->ClearAttachment(1, -1);
 
             // ACTION
             // - - - - - -
@@ -71,11 +84,21 @@ namespace Slate {
                     Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ModelMatrix", model);
                     Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setInt("v_EntityID", (int)(entt::entity)entity);
 
+                    // this is dumb and needs to be replaced by ubos
                     Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ModelMatrix", model);
                     Renderer::GetShaderManager().Get("solid_color")->setInt("v_EntityID", (int)(entt::entity)entity);
+                    Renderer::GetShaderManager().Get("normals_only")->setMat4("v_ModelMatrix", model);
+                    Renderer::GetShaderManager().Get("normals_only")->setInt("v_EntityID", (int)(entt::entity)entity);
+                    Renderer::GetShaderManager().Get("overdraw")->setMat4("v_ModelMatrix", model);
+                    Renderer::GetShaderManager().Get("overdraw")->setInt("v_EntityID", (int)(entt::entity)entity);
                 }
+                // want to simplify (remove) this later
                 if (m_ActiveContext->m_ShaderMode == SHADERMODE::SOLIDWHITE)
                     Renderer::GetShaderManager().Get("solid_color")->UseProgram();
+                else if (m_ActiveContext->m_ShaderMode == SHADERMODE::NORMALS_ONLY)
+                    Renderer::GetShaderManager().Get("normals_only")->UseProgram();
+                else if (m_ActiveContext->m_ShaderMode == SHADERMODE::OVERDRAW)
+                    Renderer::GetShaderManager().Get("overdraw")->UseProgram();
                 else
                     Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->UseProgram();
 
@@ -86,6 +109,8 @@ namespace Slate {
             // - - - - -
             // ALWAYS DRAW BEFORE Gui, viewport depends on it
             m_GUI->PostDrawUpdate();
+
+            // opengl 4.1 doesnt have a callback :(
             GLenum err = glGetError();
             if (err != GL_NO_ERROR) {
                 std::cerr << "OpenGL Error: " << err << std::endl;

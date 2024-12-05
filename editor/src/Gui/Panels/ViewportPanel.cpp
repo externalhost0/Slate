@@ -22,7 +22,7 @@
 
 namespace Slate {
     // post processing for view modes
-    Scope<Mesh> screenMesh;
+    Scope<Mesh> fullscreenQuad;
     Scope<Shader> depthShader;
     Scope<Shader> outlineShader;
 
@@ -40,14 +40,17 @@ namespace Slate {
             fbSpec.Height = 720;
             m_PostProcessFramebuffer = CreateRef<Framebuffer>(fbSpec);
 
-            // some shaders we use to visualize in the viewport, rn just depth and outline
-//            outlineShader = ("../editor/assets/shaders/screen.vert", "../editor/assets/shaders/outline_depth.frag");
             LayoutBuffer screenlayout = {
                     { ShaderDataType::Float2, "a_Pos" },
                     { ShaderDataType::Float2, "a_TexCoord" }
             };
-            screenMesh = CreateScope<Mesh>(Vertices{quadVertices, sizeof (quadVertices)}, Elements{quadIndices, sizeof (quadIndices)}, screenlayout);
+            fullscreenQuad = CreateScope<Mesh>(
+                    Vertices{Primitives::quadVertices2D, sizeof (Primitives::quadVertices2D)},
+                    Elements{Primitives::quadIndices, sizeof (Primitives::quadIndices)},
+                    screenlayout);
+            // some shaders we use to visualize in the viewport, rn just depth and outline
             depthShader = CreateScope<Shader>("DepthFullscreen", "../editor/assets/shaders/screen.vert","../editor/assets/shaders/linearize_depth.frag");
+//            outlineShader = ("../editor/assets/shaders/screen.vert", "../editor/assets/shaders/outline_depth.frag");
         }
     }
 
@@ -65,6 +68,7 @@ namespace Slate {
         else
             return false;
     }
+
 
     bool m_CameraControlActive = false;
     void ViewportPanel::OnImGuiUpdate() {
@@ -133,6 +137,10 @@ namespace Slate {
                             m_ViewportMode = ViewportModes::UNSHADED;
                         if (ImGui::Selectable("Depth", m_ViewportMode==ViewportModes::DEPTH))
                             m_ViewportMode = ViewportModes::DEPTH;
+                        if (ImGui::Selectable("Normals", m_ViewportMode==ViewportModes::NORMALS))
+                            m_ViewportMode = ViewportModes::NORMALS;
+                        if (ImGui::Selectable("Overdraw NW", m_ViewportMode==ViewportModes::OVERDRAW))
+                            m_ViewportMode = ViewportModes::OVERDRAW;
                         if (ImGui::Selectable("Wireframe", m_ViewportMode==ViewportModes::WIREFRAME))
                             m_ViewportMode = ViewportModes::WIREFRAME;
                         if (ImGui::Selectable("Wireframe Color", m_ViewportMode==ViewportModes::SHADED_WIREFRAME))
@@ -238,12 +246,24 @@ namespace Slate {
 
                     // do the fullscreen rendering
                     m_PostProcessFramebuffer->Bind();
-                    screenMesh->DrawMesh();
+                    fullscreenQuad->DrawMesh();
                     m_PostProcessFramebuffer->Unbind();
 
                     // now get the result and set it to be our textureID
                     textureID = m_PostProcessFramebuffer->GetColorAttachmentRendererID();
                     m_ActiveContext->m_ShaderMode = SHADERMODE::SOLIDWHITE;
+                    break;
+                }
+                case ViewportModes::NORMALS: {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    textureID = m_Framebuffer->GetColorAttachmentRendererID();
+                    m_ActiveContext->m_ShaderMode = SHADERMODE::NORMALS_ONLY;
+                    break;
+                }
+                case ViewportModes::OVERDRAW: {
+                    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+                    textureID = m_Framebuffer->GetColorAttachmentRendererID();
+                    m_ActiveContext->m_ShaderMode = SHADERMODE::OVERDRAW;
                     break;
                 }
                 case ViewportModes::WIREFRAME: {
@@ -299,6 +319,8 @@ namespace Slate {
                     break;
             }
 
+
+
             // viewport image
             ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
             if (m_ViewportSize != *((glm::vec2*)&viewportPanelSize) && viewportPanelSize.x > 0.0f && viewportPanelSize.y > 0.0f) {
@@ -306,7 +328,20 @@ namespace Slate {
                 m_Framebuffer->Resize((uint32_t) viewportPanelSize.x, (uint32_t) viewportPanelSize.y);
                 m_ViewportSize = { viewportPanelSize.x, viewportPanelSize.y };
             }
+
             ImGui::Image(reinterpret_cast<void *>(textureID), ImVec2{m_ViewportSize.x, m_ViewportSize.y},ImVec2{0, 1}, ImVec2{1, 0});
+
+            // this used a 2d method that was lackluster, now better method in main loop
+            // after image is rendered in imgui, draw text & icons on top
+     /*       for (auto id : m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, TextComponent>()) {
+                Entity entity{id, m_ActiveContext->m_ActiveScene};
+                auto entityText = entity.GetComponent<TextComponent>();
+                auto entityTransform = entity.GetComponent<TransformComponent>();
+                Render3DText(entityText.Content, ImVec4{entityText.Color[0], entityText.Color[1], entityText.Color[2], entityText.Color[3]},
+                             entityTransform.Position, m_ViewportCamera->m_CameraPosition,
+                             m_ViewportCamera->m_ViewMatrix, m_ViewportCamera->m_ProjectionMatrix,
+                             m_ViewportBounds[1].x - m_ViewportBounds[0].x, m_ViewportBounds[1].y - m_ViewportBounds[0].y);
+            }*/
 
             // overlay debug menu
             {

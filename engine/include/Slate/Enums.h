@@ -14,6 +14,8 @@ namespace Slate {
     };
     enum SHADERMODE {
         STANDARD,
+        NORMALS_ONLY,
+        OVERDRAW,
         SOLIDWHITE
     };
 }

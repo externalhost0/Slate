@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # source files
 add_library(${PROJECT_NAME}
+        src/Application.cpp
         src/Time.cpp
         src/Input.cpp
         src/Renderer.cpp
@@ -17,11 +18,10 @@ add_library(${PROJECT_NAME}
         src/Mesh.cpp
         src/Shader.cpp
 
-        src/ModelComponent.cpp
         src/Entity.cpp
+        src/MeshImport.cpp
         src/UUID.cpp
         src/ShaderManager.cpp
-        src/Application.cpp
 )
 
 # packages
@@ -29,6 +29,8 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
+
+
 
 # include and link it
 target_include_directories(${PROJECT_NAME}
@@ -38,6 +40,7 @@ target_include_directories(${PROJECT_NAME}
         PRIVATE
             glm::glm
             EnTT::EnTT
+
 )
 target_link_libraries(${PROJECT_NAME}
         PRIVATE

@@ -34,6 +34,9 @@ namespace Slate {
     void ShaderManager::Setup() {
         Load("null", "../editor/assets/shaders/static.vert", "../editor/assets/shaders/null.frag");
         Load("solid_color", "../editor/assets/shaders/static.vert", "../editor/assets/shaders/solid_color.frag");
+        Load("normals_only", "../editor/assets/shaders/static.vert", "../editor/assets/shaders/normalsonly.frag");
+        Load("overdraw", "../editor/assets/shaders/static.vert", "../editor/assets/shaders/overdraw.frag");
+
     }
 
 }

@@ -14,6 +14,7 @@
 #include <string>
 #include <typeindex>
 #include <utility>
+#include <filesystem>
 #include <assimp/scene.h>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
@@ -26,7 +27,7 @@ namespace Slate {
     public:
         bool m_IsZScalable{true};
         std::string m_ShapeName{"Unnamed Mesh"};
-        std::string m_ShaderName{"Unnamed Shader"};
+        std::string m_ShaderName{"null"};
         std::string m_Directory;
         std::vector<Mesh> m_Meshes;
     public:
@@ -44,6 +45,11 @@ namespace Slate {
                     {ShaderDataType::Float2, "a_TexCoord"}
             };
             m_Meshes.emplace_back(vertices, elements, standardlayout);
+        }
+        MeshComponent(std::string shadername, std::string shapename, bool i2D, const Vertices& vertices, const Elements& elements, const LayoutBuffer& layout)
+        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsZScalable(i2D)
+        {
+            m_Meshes.emplace_back(vertices, elements, layout);
         }
 
         // imported
@@ -64,8 +70,8 @@ namespace Slate {
         MeshCube() : MeshCube("null") {}
         explicit MeshCube(const std::string& shaderName)
         : MeshComponent(shaderName, "Cube", false,
-                {cubeVertices, sizeof (cubeVertices)},
-                {cubeIndices, sizeof (cubeIndices)}
+                {Primitives::cubeVertices, sizeof (Primitives::cubeVertices)},
+                {Primitives::cubeIndices, sizeof (Primitives::cubeIndices)}
         ) {}
     };
     struct MeshPlane : MeshComponent {
@@ -73,8 +79,20 @@ namespace Slate {
         MeshPlane() : MeshPlane("null") {}
         explicit MeshPlane(const std::string& shaderName)
         : MeshComponent(shaderName, "Plane", false,
-                {planeVertices, sizeof (planeVertices)},
-                {planeIndices, sizeof (planeIndices)}
+                {Primitives::planeVertices, sizeof (Primitives::planeVertices)},
+                {Primitives::planeIndices, sizeof (Primitives::planeIndices)}
+        ) {}
+    };
+    struct MeshQuad : MeshComponent {
+        MeshQuad() : MeshQuad("null") {}
+        explicit MeshQuad(const std::string& shaderName)
+        : MeshComponent(shaderName, "Quad", true,
+                {Primitives::quadVertices3D, sizeof (Primitives::quadVertices3D)},
+                {Primitives::quadIndices, sizeof (Primitives::quadIndices)},
+                {
+                        {ShaderDataType::Float3, "a_Position"},
+                        {ShaderDataType::Float2, "a_TexCoord"}
+                }
         ) {}
     };
 
@@ -93,6 +111,7 @@ namespace Slate {
         glm::vec3 Rotation;
         glm::vec3 Scale;
 
+
         TransformComponent() : TransformComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)) {};
         explicit TransformComponent(glm::vec3 ipos) : TransformComponent(ipos, glm::vec3(0.0f), glm::vec3(1.0f)) {};  // single arg constructor as explicit
         TransformComponent(glm::vec3 ipos, glm::vec3 irot) : TransformComponent(ipos, irot, glm::vec3(1.0f)) {};
@@ -105,10 +124,60 @@ namespace Slate {
         }
     };
 
+    enum class LightType {
+        Ambient,
+        Directional,
+        Point,
+        Spot
+    };
+
+    class LightComponent {
+    public:
+        float Strength;
+        glm::vec3 Color;
+        // default light component
+        LightComponent() : Type(LightType::Point), Strength(1.0f), Color({1.0f, 1.0f, 1.0f}) {}
+        std::string GetTypeName() const {
+            switch (Type) {
+                case LightType::Ambient: return "Ambient";
+                case LightType::Directional: return "Directional";
+                case LightType::Point: return "Point";
+                case LightType::Spot: return "Spot";
+                default: return "Unknown";
+            }
+        }
+    protected:
+        LightType Type;
+
+
+        explicit LightComponent(LightType type) : Type(type), Strength(1.0f), Color({1.0f, 1.0f, 1.0f}) {}
+    };
+    struct AmbientLight : LightComponent {
+        AmbientLight() : LightComponent(LightType::Ambient) {}
+    };
+    struct DirectionalLight : LightComponent {
+        DirectionalLight() : LightComponent(LightType::Directional) {}
+    };
+    struct PointLight : LightComponent {
+        PointLight() : LightComponent(LightType::Point) {}
+    };
+    struct SpotLight : LightComponent {
+        SpotLight() : LightComponent(LightType::Spot) {}
+    };
+
+    struct TextComponent {
+        std::string Content;
+        std::array<float, 4> Color{1.0f, 0.0f, 0.0f, 1.0f};
+
+        explicit TextComponent(std::string content)
+        : Content(std::move(content)) {}
+
+    };
 
     struct ScriptComponent {
-        std::string filePath;
+        std::filesystem::path filePath;
     };
+
 
     // required for every single entity
     struct CoreComponent {

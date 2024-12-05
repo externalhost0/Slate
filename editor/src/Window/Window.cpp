@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include <iostream>
 #include <Slate/Input.h>
-#include <SLate/Expect.h>
 
 #include "Window.h"
 
@@ -20,6 +19,8 @@ namespace Slate {
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
 
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -51,7 +52,7 @@ namespace Slate {
 
         // init glad!
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-            EXPECT(false, "Failed to initialize GLAD\nThis is likely and issue with your OpenGL version.\n")
+            std::cerr << "Failed to initialize GLAD\nThis is likely and issue with your OpenGL version." << std::endl;
 
 
         // if everything went the way it should, then give the class all the pulled values

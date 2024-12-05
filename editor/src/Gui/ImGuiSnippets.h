@@ -21,6 +21,9 @@ namespace Slate {
     void Vector3Drag(const char* label, glm::vec3 &value, float columnWidth, float resetValue, float dragSpeed);
     void HighlightedText(const char* text, ImVec4 bg_color, ImVec2 padding = {0.0f, 0.0f}, ImVec4 text_color = {1, 1, 1, 1});
 
+    void Render3DText(const std::string& text, const ImVec4& color, const glm::vec3& worldPos, const glm::vec3& cameraPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight);
+    void Render3DText(const std::string& text, const glm::vec3& worldPos, const glm::vec3& cameraPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight);
+
     // templated function
     template <typename ComponentType, typename Func>
     void ComponentPropertyPanel(Entity* entity, Func func, const char* title, const char* icon) {

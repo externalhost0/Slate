@@ -46,9 +46,13 @@ namespace Slate {
             Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
             Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setVec3("v_ViewPos",  m_CameraPosition.x, m_CameraPosition.y, m_CameraPosition.z);
 
-            Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ViewMatrix", m_ViewMatrix);
-            Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
         }
+        Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ViewMatrix", m_ViewMatrix);
+        Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+        Renderer::GetShaderManager().Get("normals_only")->setMat4("v_ViewMatrix", m_ViewMatrix);
+        Renderer::GetShaderManager().Get("normals_only")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+        Renderer::GetShaderManager().Get("overdraw")->setMat4("v_ViewMatrix", m_ViewMatrix);
+        Renderer::GetShaderManager().Get("overdraw")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
     }
 
     bool isInViewport = false;

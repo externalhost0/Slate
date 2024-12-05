@@ -124,4 +124,56 @@ namespace Slate {
         ImGui::TextUnformatted(text);
         ImGui::PopStyleColor();
     }
+    glm::vec2 WorldToScreen(const glm::vec3& worldPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight) {
+        glm::vec4 clipSpacePos = projection * view * glm::vec4(worldPos, 1.0f);
+        if (clipSpacePos.w <= 0.0f) {
+            return {-1.0f, -1.0f}; // if outside frustum
+        }
+
+        glm::vec3 ndc = glm::vec3(clipSpacePos) / clipSpacePos.w;
+        glm::vec2 screenPos = glm::vec2(
+                (ndc.x * 0.5f + 0.5f) * screenWidth,
+                (1.0f - (ndc.y * 0.5f + 0.5f)) * screenHeight
+        );
+        return screenPos;
+    }
+    void Render3DText(const std::string& text, const glm::vec3& worldPos, const glm::vec3& cameraPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight) {
+        Render3DText(text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f), worldPos, cameraPos, view, projection, screenWidth, screenHeight);
+    }
+    void Render3DText(const std::string& text, const ImVec4& color, const glm::vec3& worldPos, const glm::vec3& cameraPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight) {
+        float distance = glm::length(worldPos - cameraPos);
+        // just stop rendering if we are too far
+        if (distance > 90.0f) return;
+
+        glm::vec2 screenPos = WorldToScreen(worldPos, view, projection, screenWidth, screenHeight);
+        // also stop if outside frustum
+        if (screenPos.x == -1.0f && screenPos.y == -1.0f) return;
+//        std::cout << "World: " << screenPos.x << ", " << screenPos.y << std::endl;
+
+        // stop if transform point is outside bounds
+        // we could make this better if we used the calculated text size but its just kinda overkill
+        float padding = 10.0f;
+        if (screenPos.x < 0-padding || screenPos.y < 0-padding || screenPos.x > screenWidth+padding || screenPos.y > screenHeight+padding)
+            return;
+
+        // scaling based on distance
+        float baseSize = 23.0f;
+        float minScale = 0.5f;
+        float maxScale = 5.0f;
+        float scaleFactor = baseSize / (distance + 3.0f);
+        scaleFactor = glm::clamp(scaleFactor, minScale, maxScale);
+        ImFont* defaultFont = ImGui::GetDefaultFont();
+        float scaledFontSize = (baseSize * (baseSize / defaultFont->FontSize)) * scaleFactor;
+
+        // FIXME: needs its y axis corrected, currently looks off when backing up!
+        // correction based on new scale to center
+        ImVec2 textSize = defaultFont->CalcTextSizeA(scaledFontSize, FLT_MAX, 0.0f, text.c_str());
+        ImVec2 adjustedPos = ImVec2(screenPos.x - (textSize.x / 2), screenPos.y + (textSize.y * 1/scaleFactor)/scaleFactor);
+//        std::cout << "Adjusted: " << adjustedPos.x << ", " << adjustedPos.y << std::endl;
+
+        // now draw it on top of image
+        ImDrawList* drawList = ImGui::GetWindowDrawList();
+        drawList->AddText(defaultFont, scaledFontSize, adjustedPos, ImGui::ColorConvertFloat4ToU32(color), text.c_str());
+    }
+
 }

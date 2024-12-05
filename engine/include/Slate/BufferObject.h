@@ -63,6 +63,8 @@ namespace Slate {
             }
         }
     }
+
+
     struct BufferElement {
         std::string Name;
         ShaderDataType Type;
@@ -164,6 +166,21 @@ namespace Slate {
         uint16_t m_Stride = 0;
     };
 
+    class UniformBuffer {
+    public:
+        UniformBuffer(const void* data, uint32_t size, uint32_t offset) {
+            glGenBuffers(1, &UBO_ID);
+            glBindBuffer(GL_UNIFORM_BUFFER, UBO_ID);
+            glBufferData(GL_UNIFORM_BUFFER, size, data, GL_STATIC_DRAW);
+            glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+        void Bind() const { glBindBuffer(GL_UNIFORM_BUFFER, UBO_ID ); }
+        void Unbind() const { glBindBuffer(GL_UNIFORM_BUFFER, 0); }
+    private:
+        unsigned int UBO_ID{};
+    };
+
+    // simple wrappers for vertices and indices that allows their data to be easily converted and read
     struct Vertices {
         Vertices() = default;
         explicit Vertices(std::vector<float> data)

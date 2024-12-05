@@ -18,6 +18,8 @@ namespace Slate {
         SHADED,
         UNSHADED,
         DEPTH,
+        NORMALS,
+        OVERDRAW,
         WIREFRAME,
         SHADED_WIREFRAME,
     };

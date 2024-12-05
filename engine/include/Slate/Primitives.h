@@ -5,14 +5,20 @@
 #ifndef SLATE_PRIMITIVES_H
 #define SLATE_PRIMITIVES_H
 
-namespace Slate {
+namespace Slate::Primitives {
 
 // all primitives follow:
 // position, normal, texCoords
 // except for the quad cause its unneeded, just use a plane
 // should be flowing counter clockwise (CCW)
-
-    constexpr float quadVertices[] = {
+    constexpr float quadVertices3D[] = {
+            // positions                        // texCoords
+            -1.0f, 1.0f, 0.0f,  0.0f, 1.0f, // top left
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
+            1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+            1.0f, 1.0f, 0.0f, 1.0f, 1.0f // top right
+    };
+    constexpr float quadVertices2D[] = {
             // positions             // texCoords
             -1.0f, 1.0f,  0.0f, 1.0f, // top left
             -1.0f, -1.0f,  0.0f, 0.0f, // bottom left
@@ -82,6 +88,7 @@ namespace Slate {
             20, 21, 22,
             22, 23, 20
     };
+
 
 }
 

@@ -204,6 +204,11 @@ namespace Slate {
     }
 
 
+    void ComponentLight(Entity* entity) {
+        ImGui::Text("%s", entity->GetComponent<LightComponent>().GetTypeName().c_str());
+    }
+
+
     void PropertiesPanel::OnAttach() {
 
 
@@ -211,10 +216,11 @@ namespace Slate {
 
     using ComponentEntry = std::pair<const char*, std::type_index>;
     // make sure you update the m_Count of the array
-    std::array<ComponentEntry, 3> componentEntries = {{
+    std::array<ComponentEntry, 4> componentEntries = {{
         {"Transform", typeid(TransformComponent)},
         {"Script", typeid(ScriptComponent)},
-        {"Mesh", typeid(MeshComponent)}
+        {"Mesh", typeid(MeshComponent)},
+        {"Light", typeid(LightComponent)}
     }};
     // later i want the mesh components to be empty by default
     // the defauly action upon adding a new component to your entity
@@ -222,11 +228,13 @@ namespace Slate {
             {typeid(TransformComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<TransformComponent>(); }},
             {typeid(ScriptComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<ScriptComponent>(); }},
             {typeid(MeshComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<MeshComponent>(MeshCube()); }},
+            {typeid(LightComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<LightComponent>(); }},
     };
     std::unordered_map<std::type_index, std::function<bool(Context*)>> componentCheckers = {
             {typeid(TransformComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<TransformComponent>(); }},
             {typeid(ScriptComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<ScriptComponent>(); }},
             {typeid(MeshComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<MeshComponent>(); }},
+            {typeid(LightComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<LightComponent>(); }},
     };
 
 
@@ -245,6 +253,7 @@ namespace Slate {
             // now each component will be listed below if available
             ComponentPropertyPanel<TransformComponent>(entity, ComponentTransformation, "Transform", ICON_LC_MOVE_3D);
             ComponentPropertyPanel<ScriptComponent>(entity, ComponentScript, "Script", ICON_LC_SCROLL);
+            ComponentPropertyPanel<LightComponent>(entity, ComponentLight, "Light", ICON_LC_LIGHTBULB);
             ComponentPropertyPanel<MeshComponent>(entity, ComponentMesh, "Mesh", ICON_LC_BLOCKS);
 
 

@@ -16,15 +16,12 @@ namespace Slate {
 
     void Renderer::Init() {
         // ONLY FLAGS FOR OPENGL
-        // enable depth testing
-        glEnable(GL_DEPTH_TEST);
-        // enable stencil testing (for outlines)
-        glEnable(GL_STENCIL_TEST);
-        // set culling so only front faces show
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        glFrontFace(GL_CCW);
-        // enable srgb for nicer colors and their transitions
+        glEnable(GL_DEPTH_TEST); // enable depth testing
+        glEnable(GL_STENCIL_TEST); // enable stencil testing (for outlines)
+        glEnable(GL_CULL_FACE); // set culling so only front faces show
+        glCullFace(GL_BACK); // cull back
+        glFrontFace(GL_CCW); // tell opengl all of our stuff is counter clockwise
+
         // enables alpha testing / blend
 //        glEnable(GL_BLEND);
 //        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

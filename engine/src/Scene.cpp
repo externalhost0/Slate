@@ -84,12 +84,20 @@ namespace Slate {
     {
 
     }
-
     template<>
     void Scene::OnComponentAdded<ScriptComponent>(Entity entity, ScriptComponent& component)
     {
 
     }
+    template<>
+    void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
+    {
 
+    }
+    template<>
+    void Scene::OnComponentAdded<TextComponent>(Entity entity, TextComponent& component)
+    {
+
+    }
 
 }
