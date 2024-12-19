@@ -1,7 +1,7 @@
 #version 410 core
 in vec2 TexCords;
 
-out vec4 FragColor;
+layout(location = 0) out vec4 FragColor;
 
 // just manually fill in these values for now
 uniform sampler2D u_DepthTexture; // Depth texture

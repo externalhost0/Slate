@@ -10,31 +10,18 @@
 namespace Slate {
     class Mesh {
     public:
-        Mesh(const Vertices& vertice, const Elements& element, const LayoutBuffer& layout) {
-            m_VertexData = vertice;
-            m_ElementData = element;
-            m_Layout = layout;
-
-            glGenVertexArrays(1, &VAO);
-            glBindVertexArray(VAO);
-
-            glGenBuffers(1, &VBO);
-            glBindBuffer(GL_ARRAY_BUFFER, VBO);
-            glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizei>(m_VertexData.m_Size), m_VertexData.m_Data.data(), GL_STATIC_DRAW);
-
-            glGenBuffers(1, &EBO);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizei>(m_ElementData.m_Size), m_ElementData.m_Data.data(), GL_STATIC_DRAW);
-
-            for (const auto& el : layout)
-                AddVertexAttribArray(el);
-            glBindVertexArray(0);
-
-        }
+        Mesh(const Vertices& vertices, const LayoutBuffer& layout);
+        Mesh(const Vertices& vertices, const LayoutBuffer& layout, GLint mode)
+        : Mesh(vertices, layout) { this->mode = mode; }
+        Mesh(const Vertices& vertices, const Elements& element, const LayoutBuffer& layout);
+    public:
         void DrawMesh() const;
+        void Bind() const;
+        void Unbind() const;
     private:
         void AddVertexAttribArray(const BufferElement& element);
     private:
+        GLint mode{GL_TRIANGLES};
         unsigned int VAO{}, VBO{}, EBO{};
         unsigned int m_AttribIndex = 0; // all indexs always start at 0
         Vertices m_VertexData{};

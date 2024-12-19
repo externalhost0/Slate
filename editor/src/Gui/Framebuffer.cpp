@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-#include <iostream>
+#include <cstdio>
 #include <utility>
 #include <glm/vec3.hpp>
 
@@ -158,7 +158,7 @@ namespace Slate {
                         Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA16F, GL_RGBA, m_Specification.Width, m_Specification.Height, (int) i);
                         break;
                     default:
-                        std::cerr << "Not a supported color format!" << std::endl;
+                        fprintf(stderr, "Not a supported color format!");
                         break;
                 }
             }
@@ -172,7 +172,7 @@ namespace Slate {
                     Utils::AttachDepthTexture(m_DepthAttachment, m_Specification.Samples, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL_ATTACHMENT, m_Specification.Width, m_Specification.Height);
                     break;
                 default:
-                    std::cerr << "Not a supported depth format!" << std::endl;
+                    fprintf(stderr, "Not a supported depth format!\n");
                     break;
             }
         }

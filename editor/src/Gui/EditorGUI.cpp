@@ -97,8 +97,8 @@ namespace Slate {
 #ifdef __APPLE__
         io.ConfigMacOSXBehaviors = true; // changes a ton of stuff, just click on it
 #endif
-        // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForOpenGL(m_EditorWindow->GetNativeWindow(), false);  // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+        // Setup Platform/RenderManager backends
+        ImGui_ImplGlfw_InitForOpenGL(m_EditorWindow.GetNativeWindow(), false);  // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
         ImGui_ImplOpenGL3_Init("#version 410");
 
 
@@ -126,7 +126,7 @@ namespace Slate {
                 ImGui::Separator();
 //                if (ImGui::MenuItem("Settings")) SettingsWindow::SpawnWindow();
 //                ImGui::Separator();
-                if (ImGui::MenuItem("Exit", "esc")) glfwSetWindowShouldClose(m_EditorWindow->GetNativeWindow(), true);
+                if (ImGui::MenuItem("Exit", "esc")) glfwSetWindowShouldClose(m_EditorWindow.GetNativeWindow(), true);
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Edit")) {
@@ -182,7 +182,7 @@ namespace Slate {
             // The GetID() function is to give a unique identifier to the Dockspace - here, it's "MyDockSpace".
             ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
             ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-        } else std::cerr << "Docking needs to be enabled in the io Flags!!" << std::endl;
+        } else fprintf(stderr, "Docking needs to be enabled in the io Flags!!\n");
 
         // now let's do the actual stuff below
         ActualWindowUpdate();
@@ -198,10 +198,6 @@ namespace Slate {
     void EditorGUI::DrawFinish() const {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-    }
-
-    EditorGUI::EditorGUI() {
-        m_EditorWindow = &Editor::GetEditorWindow();
     }
 
 }

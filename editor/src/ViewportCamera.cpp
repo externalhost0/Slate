@@ -34,25 +34,25 @@ namespace Slate {
         m_ProjectionMatrix = glm::perspective(glm::radians((float) m_FOV), m_AspectRatio, m_ZNear, m_ZFar);
         m_ViewMatrix = glm::lookAt(m_CameraPosition, m_CameraPosition + m_CameraFront, cameraUp);
 
-
         // Set uniform matrices for camera specific input
         // so.. small bug where shader is shared between primitive comp and model comp so these view and proj are set on startup
         // figure a way to cache and store shaders so that we dont accidently set shaders across different components
         // look up uniform buffer objects or ssbo
+        auto shaderMan = SystemLocator::Get<RenderManager>();
         auto viewer = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, MeshComponent>();
         for (auto id : viewer) {
             Entity entity {id, m_ActiveContext->m_ActiveScene};
-            Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ViewMatrix", m_ViewMatrix);
-            Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
-            Renderer::GetShaderManager().Get(entity.GetComponent<MeshComponent>().m_ShaderName)->setVec3("v_ViewPos",  m_CameraPosition.x, m_CameraPosition.y, m_CameraPosition.z);
+            shaderMan.GetShaderManager().Get("Basic")->SetMat4("v_ViewMatrix", m_ViewMatrix);
+            shaderMan.GetShaderManager().Get("Basic")->SetMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+            shaderMan.GetShaderManager().Get("Basic")->SetVec3("v_ViewPos", m_CameraPosition.x, m_CameraPosition.y,
+                                                               m_CameraPosition.z);
 
         }
-        Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ViewMatrix", m_ViewMatrix);
-        Renderer::GetShaderManager().Get("solid_color")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
-        Renderer::GetShaderManager().Get("normals_only")->setMat4("v_ViewMatrix", m_ViewMatrix);
-        Renderer::GetShaderManager().Get("normals_only")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
-        Renderer::GetShaderManager().Get("overdraw")->setMat4("v_ViewMatrix", m_ViewMatrix);
-        Renderer::GetShaderManager().Get("overdraw")->setMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+        shaderMan.GetShaderManager().Get("solid_color")->SetMat4("v_ViewMatrix", m_ViewMatrix);
+        shaderMan.GetShaderManager().Get("solid_color")->SetMat4("v_ProjectionMatrix", m_ProjectionMatrix);
+
+        shaderMan.GetShaderManager().Get("normals_only")->SetMat4("v_ViewMatrix", m_ViewMatrix);
+        shaderMan.GetShaderManager().Get("normals_only")->SetMat4("v_ProjectionMatrix", m_ProjectionMatrix);
     }
 
     bool isInViewport = false;
@@ -100,7 +100,7 @@ namespace Slate {
     double ypos;
     const float MOUSE_SENSITIVITY = 0.1f;
     void ViewportCamera::MouseUpdate() {
-        glm::vec2 pos = Input::GetMousePosition();
+        glm::vec2 pos = SystemLocator::Get<InputManager>().GetMousePosition();
         xpos = pos.x;
         ypos = pos.y;
 
@@ -127,25 +127,27 @@ namespace Slate {
     void ViewportCamera::IndependentInput() {
         MouseUpdate();
 
+        auto inputMan = SystemLocator::Get<InputManager>();
+
         glm::vec3 scaledVector;
         // sprint function in viewport camera
-        if (Input::IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
+        if (inputMan.IsKeyPressed(GLFW_KEY_LEFT_SHIFT))
             m_CameraActualSpeed = m_CameraBaseSpeed * SPRINT_MULTIPLIER;
         else
             m_CameraActualSpeed = m_CameraBaseSpeed;
         float adjustedSpeed = m_CameraActualSpeed * (float) Time::GetDeltaTime();
 
-        if (Input::IsKeyPressed(GLFW_KEY_W))
+        if (inputMan.IsKeyPressed(GLFW_KEY_W))
             m_CameraPosition = m_CameraPosition + adjustedSpeed * m_CameraFront;
-        if (Input::IsKeyPressed(GLFW_KEY_S))
+        if (inputMan.IsKeyPressed(GLFW_KEY_S))
             m_CameraPosition = m_CameraPosition - adjustedSpeed * m_CameraFront;
-        if (Input::IsKeyPressed(GLFW_KEY_A))
+        if (inputMan.IsKeyPressed(GLFW_KEY_A))
             m_CameraPosition = m_CameraPosition - glm::normalize(glm::cross(m_CameraFront, cameraUp)) * adjustedSpeed;
-        if (Input::IsKeyPressed(GLFW_KEY_D))
+        if (inputMan.IsKeyPressed(GLFW_KEY_D))
             m_CameraPosition = m_CameraPosition + glm::normalize(glm::cross(m_CameraFront, cameraUp)) * adjustedSpeed;
-        if (Input::IsKeyPressed(GLFW_KEY_SPACE))
+        if (inputMan.IsKeyPressed(GLFW_KEY_SPACE))
             m_CameraPosition = m_CameraPosition + adjustedSpeed * cameraUp;
-        if (Input::IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
+        if (inputMan.IsKeyPressed(GLFW_KEY_LEFT_CONTROL))
             m_CameraPosition = m_CameraPosition - adjustedSpeed * cameraUp;
     }
 }

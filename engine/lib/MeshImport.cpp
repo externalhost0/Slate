@@ -2,7 +2,6 @@
 // Created by Hayden Rivas on 11/21/24.
 //
 
-#include <iostream>
 #include <glm/vec2.hpp>
 
 #include <assimp/postprocess.h>
@@ -11,6 +10,7 @@
 #include "Slate/Components.h"
 #include "Slate/Expect.h"
 
+// this whole thing needs to be scrapped and rewritten
 namespace Slate {
     struct Vertex {
         glm::vec3 Position;
@@ -45,8 +45,7 @@ namespace Slate {
         // theres more assimp flags you should read about online
         const aiScene *scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals);
         if(!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-            std::cout << "ERROR::ASSIMP::" << import.GetErrorString() << std::endl;
-            EXPECT(false, "Assimp broke :(");
+            fprintf(stderr, "ERROR::ASSIMP::%s\n", import.GetErrorString());
             return;
         }
 
@@ -85,7 +84,7 @@ namespace Slate {
             vector.z = mesh->mNormals[i].z;
             vertex.Normal = vector;
 
-            // if mesh has texture coordinates perform assignment
+            // if mesh has lightbulbTexture coordinates perform assignment
             if(mesh->mTextureCoords[0]) {
                 glm::vec2 vec;
                 vec.x = mesh->mTextureCoords[0][i].x;

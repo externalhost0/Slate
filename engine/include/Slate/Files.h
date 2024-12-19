@@ -7,10 +7,15 @@
 #include <cstdlib>
 #include <cstdio>
 #include <string>
+#include "IManager.h"
+
 
 namespace Slate {
-    class Files {
-    public:
+    class FileManager : public IManager {
+    private:
+        void Initialize() override {};
+        void Shutdown() override {};
+        friend class Application;
     private:
     };
 }

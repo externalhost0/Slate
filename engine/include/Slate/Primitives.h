@@ -9,33 +9,36 @@ namespace Slate::Primitives {
 
 // all primitives follow:
 // position, normal, texCoords
+// except for flat surfaces like plane and quad cause they only have one possible direction/normal
 // except for the quad cause its unneeded, just use a plane
 // should be flowing counter clockwise (CCW)
-    constexpr float quadVertices3D[] = {
-            // positions                        // texCoords
-            -1.0f, 1.0f, 0.0f,  0.0f, 1.0f, // top left
-            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // bottom left
-            1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-            1.0f, 1.0f, 0.0f, 1.0f, 1.0f // top right
-    };
     constexpr float quadVertices2D[] = {
-            // positions             // texCoords
+            // positions               // texCoords
             -1.0f, 1.0f,  0.0f, 1.0f, // top left
-            -1.0f, -1.0f,  0.0f, 0.0f, // bottom left
-            1.0f, -1.0f,  1.0f, 0.0f, // bottom right
-            1.0f, 1.0f,  1.0f, 1.0f // top right
+            -1.0f, -1.0f, 0.0f, 0.0f, // bottom left
+            1.0f, -1.0f, 1.0f, 0.0f, // bottom right
+            1.0f, 1.0f, 1.0f, 1.0f // top right
     };
+    constexpr float quadVertices3D[] = {
+            // positions                           // texCoords
+            -1.0f, 1.0f, 1.0f,    0.0f, 1.0f, // top left
+            -1.0f, -1.0f, 1.0f,  0.0f, 0.0f, // bottom left
+            1.0f, -1.0f, 1.0f, 1.0f, 0.0f, // bottom right
+            1.0f, 1.0f, 1.0f,  1.0f, 1.0f // top right
+    };
+
+
     constexpr unsigned int quadIndices[] = {
             0, 1, 3,   // first triangle
             1, 2, 3    // second triangle
     };
 
     constexpr float planeVertices[] = {
-            // Position                           // Normal                          // TexCoord
-            -1.0f,  1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   0.0f, 1.0f,  // Top left
-            -1.0f, -1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   0.0f, 0.0f, // Bottom left
-            1.0f, -1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   1.0f, 0.0f, // Bottom right
-            1.0f,  1.0f, 0.0f,   0.0f, 0.0f, -1.0f,   1.0f, 1.0f // Top right
+            // Position                          // Normal                         // TexCoord
+            -1.0f,  1.0f, 1.0f,   0.0f,  0.0f, -1.0f,  0.0f, 1.0f,  // Top left
+            -1.0f, -1.0f, 1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // Bottom left
+            1.0f, -1.0f, 1.0f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f, // Bottom right
+            1.0f,  1.0f, 1.0f, 0.0f, 0.0f, -1.0f,  1.0f, 1.0f // Top right
     };
     constexpr unsigned int planeIndices[] = {
             0, 1, 3,

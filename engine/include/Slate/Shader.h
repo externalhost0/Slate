@@ -28,18 +28,18 @@ namespace Slate {
         const std::string& GetName() const { return m_Name; };
 
         // uniform setter methods
-        void setBool(const char* name, bool value) const;
-        void setInt(const char* name, int value) const;
-        void setFloat(const char* name, float value) const;
-        void setVec2(const char* name, const glm::vec2 *value) const;
-        void setVec3(const char* name, const glm::vec3 *value) const;
-        void setVec4(const char* name, const glm::vec4 *value) const;
-        void setVec2(const char* name, float x, float y) const;
-        void setVec3(const char* name, float x, float y, float z) const;
-        void setVec4(const char* name, float x, float y, float z, float w) const;
-        void setMat2(const char* name, const glm::mat2 &mat) const;
-        void setMat3(const char* name, const glm::mat3 &mat) const;
-        void setMat4(const char* name, const glm::mat4 &mat) const;
+        void SetBool(const std::string& name, bool value) const;
+        void SetInt(const std::string& name, int value) const;
+        void SetFloat(const std::string& name, float value) const;
+        void SetVec2(const std::string& name, const glm::vec2 *value) const;
+        void SetVec3(const std::string& name, const glm::vec3 *value) const;
+        void SetVec4(const std::string& name, const glm::vec4 *value) const;
+        void SetVec2(const std::string& name, float x, float y) const;
+        void SetVec3(const std::string& name, float x, float y, float z) const;
+        void SetVec4(const std::string& name, float x, float y, float z, float w) const;
+        void SetMat2(const std::string& name, const glm::mat2 &mat) const;
+        void SetMat3(const std::string& name, const glm::mat3 &mat) const;
+        void SetMat4(const std::string& name, const glm::mat4 &mat) const;
 
         // uniform data getter methods
         bool getBool(const char* name) const;
@@ -53,11 +53,12 @@ namespace Slate {
         std::string m_FragmentFile;
     private:
         std::string m_Name;
-        unsigned int CompileProgram(const std::string& vfp, const std::string& ffp);
-        int GetUniformLocation(const char* name) const;
-        mutable std::unordered_map<const char*, int> m_UniformLocationCache;
+        mutable std::unordered_map<std::string, int> m_UniformLocationCache;
         unsigned int m_ProgramID{}; // acts like an id for shaders? should i use an independent integar variable for that?
         friend class Mesh; // they are tied very close to each other
+    private:
+        unsigned int CompileProgram(const std::string& vfp, const std::string& ffp);
+        int GetUniformLocation(const std::string& name) const;
     };
 }
 

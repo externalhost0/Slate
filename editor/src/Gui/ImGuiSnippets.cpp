@@ -30,6 +30,41 @@ namespace Slate {
         // return the new ImVec4 with the adjusted RGB and original alpha
         return {r, g, b, color.w};
     }
+    ImVec4 HueShift(const ImVec4& color, float amount) {
+        // normalize input amount
+        amount = std::clamp(amount, -1.0f, 1.0f);
+
+        // rgb to hsv for manipulation
+        float r = color.x, g = color.y, b = color.z;
+        float max = std::max(r, std::max(g, b)), min = std::min(r, std::min(g, b));
+        float h = 0.0f, s = (max == 0.0f) ? 0.0f : (max - min) / max, v = max;
+
+        if (max != min) {
+            if (r == max) h = (g - b) / (max - min);
+            else if (g == max) h = (b - r) / (max - min) + 2.0f;
+            else h = (r - g) / (max - min) + 4.0f;
+            h *= 60.0f;
+            if (h < 0.0f) h += 360.0f;
+        }
+
+        h = fmod(h + amount * 360.0f, 360.0f);
+        if (h < 0.0f) h += 360.0f;
+
+        // convert back to RGB
+        int i = int(h / 60.0f);
+        float f = h / 60.0f - i, p = v * (1.0f - s), q = v * (1.0f - f * s), t = v * (1.0f - (1.0f - f) * s);
+        float rgb[3] = {p, q, t};
+        if (i == 0) { rgb[0] = v; rgb[1] = t; rgb[2] = p; }
+        else if (i == 1) { rgb[0] = q; rgb[1] = v; rgb[2] = p; }
+        else if (i == 2) { rgb[0] = p; rgb[1] = v; rgb[2] = t; }
+        else if (i == 3) { rgb[0] = p; rgb[1] = q; rgb[2] = v; }
+        else if (i == 4) { rgb[0] = t; rgb[1] = p; rgb[2] = v; }
+        else { rgb[0] = v; rgb[1] = p; rgb[2] = q; }
+
+        // return new, same alpha
+        return {rgb[0], rgb[1], rgb[2], color.w};
+    }
+
 
     void Vector3Drag(const char *label, glm::vec3 &value, float columnWidth, float resetValue, float dragSpeed) {
         ImGui::PushID(label);
@@ -157,7 +192,7 @@ namespace Slate {
             return;
 
         // scaling based on distance
-        float baseSize = 23.0f;
+        float baseSize = 15.0f;
         float minScale = 0.5f;
         float maxScale = 5.0f;
         float scaleFactor = baseSize / (distance + 3.0f);

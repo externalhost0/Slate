@@ -5,7 +5,7 @@
 #include "Slate/Time.h"
 
 namespace Slate {
-    void Time::CalculateDeltaTime() {
+    void Time::UpdateDeltaTime() {
         auto currentTime = std::chrono::high_resolution_clock::now();
         std::chrono::duration<float> delta = currentTime - lastTime;
         lastTime = currentTime;
@@ -13,4 +13,8 @@ namespace Slate {
     }
 
     double Time::GetDeltaTime() { return deltaTime; }
+    double Time::GetTime() {
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        return std::chrono::duration<double>(currentTime - startTime).count();
+    }
 }

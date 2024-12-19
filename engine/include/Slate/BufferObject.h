@@ -12,7 +12,6 @@
 #include <utility>
 
 namespace Slate {
-
     enum class ShaderDataType {
         None = 0,
 
@@ -73,7 +72,7 @@ namespace Slate {
         bool Normalized;
 
         BufferElement(ShaderDataType type, std::string name, bool normalized = false)
-                : Type(type), Name(std::move(name)), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized) {}
+        : Type(type), Name(std::move(name)), Size(ShaderDataTypeSize(type)), Offset(0), Normalized(normalized) {}
 
         uint16_t GetElementCount() const {
             switch (Type) {
@@ -140,10 +139,12 @@ namespace Slate {
     class LayoutBuffer {
     public:
         LayoutBuffer(const std::initializer_list<BufferElement>& elements)
-                : m_Elements(elements) {
+        : m_Elements(elements) {
             CalculateOffsetAndStride();
         }
+        inline unsigned int GetCountPerVertex() const { return m_CountStride; };
         inline uint16_t GetStride() const { return m_Stride; }
+
         inline const std::vector<BufferElement>& GetElements() const { return m_Elements; };
 
         // iterator operators
@@ -155,15 +156,16 @@ namespace Slate {
     private:
         void CalculateOffsetAndStride() {
             size_t offset = 0;
-            m_Stride = 0;
             for (auto& el : m_Elements) {
                 el.Offset = offset;
                 offset += el.Size;
                 m_Stride += el.Size;
+                m_CountStride += el.GetElementCount();
             }
         }
         std::vector<BufferElement> m_Elements;
-        uint16_t m_Stride = 0;
+        uint16_t m_Stride{0};
+        unsigned int m_CountStride{0};
     };
 
     class UniformBuffer {

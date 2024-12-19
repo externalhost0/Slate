@@ -7,20 +7,23 @@
 
 #include "GLFW/glfw3.h"
 #include <glm/glm.hpp>
+#include "IManager.h"
 
 namespace Slate {
-    class Input {
+    class InputManager : public IManager {
     public:
-        static bool IsKeyPressed(int key);
-        static bool IsMouseButtonPressed(int button);
-        static glm::vec2 GetMousePosition();
 
-        static void SetInputMode(int mode);
-        static int GetInputMode();
-        // inject window variable
-        static void SetWindow(GLFWwindow* window);
+        bool IsKeyPressed(int key);
+        bool IsMouseButtonPressed(int button);
+        glm::vec2 GetMousePosition();
+
+        void SetInputMode(int mode);
+        int GetInputMode();
     private:
-        inline static GLFWwindow* m_Window;
+        void Initialize() override {};
+        void Shutdown() override {};
+        friend class Application;
+    private:
     };
 
 }

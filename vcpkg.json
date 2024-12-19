@@ -34,5 +34,11 @@
     "name" : "glad",
     "version>=" : "0.1.36",
     "features" : [ "gl-api-41" ]
+  }, {
+    "name" : "freetype",
+    "version>=" : "2.13.3"
+  }, {
+    "name" : "stb",
+    "version>=" : "2024-07-29#1"
   } ]
 }

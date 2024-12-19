@@ -19,7 +19,6 @@ namespace Slate {
         UNSHADED,
         DEPTH,
         NORMALS,
-        OVERDRAW,
         WIREFRAME,
         SHADED_WIREFRAME,
     };
@@ -38,7 +37,6 @@ namespace Slate {
     private:
         bool IsInViewportBounds();
         Ref<Framebuffer> m_Framebuffer;
-        Ref<Framebuffer> m_PostProcessFramebuffer;
         ViewportModes m_ViewportMode = ViewportModes::SHADED;
         Entity m_HoveredEntity;
         void OnAttach() override;

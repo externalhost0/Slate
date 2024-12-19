@@ -2,18 +2,54 @@
 // Created by Hayden Rivas on 11/21/24.
 //
 #include <glad/glad.h>
-#include <iostream>
 #include "Slate/Mesh.h"
 namespace Slate {
+    Mesh::Mesh(const Vertices& vertices, const LayoutBuffer& layout) {
+        m_VertexData = vertices;
+        m_Layout = layout;
+
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
+        glGenBuffers(1, &VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizei>(m_VertexData.m_Size), m_VertexData.m_Data.data(), GL_STATIC_DRAW);
+
+        for (const auto& el : layout)
+            AddVertexAttribArray(el);
+        glBindVertexArray(0);
+    }
+    Mesh::Mesh(const Vertices& vertices, const Elements& element, const LayoutBuffer& layout) {
+        m_VertexData = vertices;
+        m_ElementData = element;
+        m_Layout = layout;
+
+        glGenVertexArrays(1, &VAO);
+        glBindVertexArray(VAO);
+
+        glGenBuffers(1, &VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER, static_cast<GLsizei>(m_VertexData.m_Size), m_VertexData.m_Data.data(), GL_STATIC_DRAW);
+
+        glGenBuffers(1, &EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, static_cast<GLsizei>(m_ElementData.m_Size), m_ElementData.m_Data.data(), GL_STATIC_DRAW);
+
+        for (const auto& el : layout)
+            AddVertexAttribArray(el);
+        glBindVertexArray(0);
+    }
+
+    void Mesh::Bind() const { glBindVertexArray(VAO); }
+    void Mesh::Unbind() const { glBindVertexArray(0); }
+
     void Mesh::DrawMesh() const {
         // draw mesh, accounts if the binded vertex array has indices or not
-        glBindVertexArray(VAO);
         if (m_ElementData.m_Data.empty()) {
-            glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(m_VertexData.m_Data.size()));
+            glDrawArrays(mode, 0, static_cast<GLsizei>(m_VertexData.m_Data.size() / m_Layout.GetCountPerVertex()));
         } else {
-            glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(m_ElementData.m_Data.size()), GL_UNSIGNED_INT, nullptr);
+            glDrawElements(mode, static_cast<GLsizei>(m_ElementData.m_Data.size()), GL_UNSIGNED_INT, nullptr);
         }
-        glBindVertexArray(0);
     }
 
 

@@ -6,7 +6,6 @@
 #define SLATE_SCENE_H
 
 #include <entt/entt.hpp>
-#include <iostream>
 #include "UUID.h"
 
 namespace Slate {

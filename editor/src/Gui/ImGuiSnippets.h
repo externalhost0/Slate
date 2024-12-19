@@ -15,16 +15,20 @@
 
 namespace Slate {
     struct TransformComponent;
-    // helper functions
+    // color helper functions
     ImVec4 Brighten(const ImVec4& color, float amount);
     ImVec4 Desaturate(const ImVec4& color, float amount);
+    ImVec4 HueShift(const ImVec4& color, float amount);
+
+
+    // short imgui widhets
     void Vector3Drag(const char* label, glm::vec3 &value, float columnWidth, float resetValue, float dragSpeed);
     void HighlightedText(const char* text, ImVec4 bg_color, ImVec2 padding = {0.0f, 0.0f}, ImVec4 text_color = {1, 1, 1, 1});
 
     void Render3DText(const std::string& text, const ImVec4& color, const glm::vec3& worldPos, const glm::vec3& cameraPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight);
     void Render3DText(const std::string& text, const glm::vec3& worldPos, const glm::vec3& cameraPos, const glm::mat4& view, const glm::mat4& projection, float screenWidth, float screenHeight);
 
-    // templated function
+    // templated function for all panels
     template <typename ComponentType, typename Func>
     void ComponentPropertyPanel(Entity* entity, Func func, const char* title, const char* icon) {
         // make sure a component is only shown if an entity has it

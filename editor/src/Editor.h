@@ -8,36 +8,31 @@
 // 2. a gui
 // any other essentials will be relocated
 #include <Slate/Scope.h>
+#include "Context.h"
+#include "Gui/EditorGUI.h"
 #include <yaml-cpp/yaml.h>
 
-#include "EditorLayer.h"
+#include <Slate/Application.h>
 
 namespace Slate {
-    class Editor {
-    public:
-        // dont have much of a reason for member variables to be exposed in a class like this,
-        // everything should be fairly abstracted
-        YAML::Node m_ConfigFile;
+    // inherit publicly to use create function!!
+    class Editor : public Application {
     public:
         // go somewhere later
         void LoadConfig();
         void SaveConfig() const;
-        // actually start the app
-        void Run();
-        static Window& GetEditorWindow() {
-            assert(m_MainWindow && "Main window is not initialized!");
-            return *m_MainWindow;
-        };
-        std::vector<Scope<Window>> m_SubWindows; // optional runtime construction
+    public:
+        Ref<Context> m_ActiveContext;
+        Ref<EditorGUI> m_GUI;
 
     private:
-        // processing of engine steps
-        void Init();
-        void Loop();
-        void Shutdown();
+        // processing of ediotr steps
+        // we override the applications events given to us
+        void Initialize() override;
+        void Loop() override;
+        void Shutdown() override;
     private:
-        static inline Scope<Window> m_MainWindow; // delay construction
-        Scope<EditorLayer> m_EditorLayer;
+        Ref<Framebuffer> m_Framebuffer;
     };
 }
 #endif //SLATE_EDITOR_H

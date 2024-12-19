@@ -71,7 +71,8 @@ namespace Slate {
         // now set it back to the rotation
         transform.Rotation = localRotation;
 
-        Vector3Drag("Scale", transform.Scale, width, 1.0f, 0.1f);
+        if (!transform.NoScale)
+            Vector3Drag("Scale", transform.Scale, width, 1.0f, 0.1f);
     }
 
     // uniforms directly set by the editor ONLY
@@ -91,110 +92,109 @@ namespace Slate {
         }
 
         ImGui::Spacing();
-        ImGui::PushFont(Fonts::boldFont);
-        ImGui::Text("Shader Specifications: ");
-        ImGui::PopFont();
-        ImGui::Separator();
-        ImGui::PushFont(Fonts::italicFont);
-        ImGui::Text("Shader Files: ");
-        ImGui::PopFont();
-        float indent = 50.0f;
-        ImGui::Indent(indent);
-        auto& shader = *entity->GetComponent<MeshComponent>().GetMeshShader();
-        ImGui::Text("%s", shader.m_VertexFile.c_str());
-        ImGui::Text("%s", shader.m_FragmentFile.c_str());
-        ImGui::Unindent(indent);
-
-        // - - - - - - - - //
-
-        // for every uniform display it correctly
-        GLint count;
-        unsigned int progID = shader.GetProgramIDCopy();
-        glGetProgramiv(progID, GL_ACTIVE_UNIFORMS, &count);
-
-        ImGui::Text("Available Uniforms:");
-        for (GLint i = 0; i < count; i++) {
-            char name[128];
-            GLint size; // m_Count of the variable
-            GLenum type; // type of the variable (float, vec3 or mat4, etc)
-            GLsizei length; // name length
-            glGetActiveUniform(progID, (GLuint) i, sizeof (name), &length, &size, &type, name);
-            // if uniform is one that is set internally by the editor mark it as so with some text
-            bool isUneditable = false;
-            for (const char *unedit_name: unedit_uniforms) {
-                if (std::strcmp(name, unedit_name) == 0) {
-                    isUneditable = true;
-                    break;
-                }
-            }
-            if (isUneditable) continue;
-
-            ImGui::PushID(typeid(MeshComponent).hash_code() + (int)(uint64_t)entity->GetUUID());
-            ImGui::Text("%s : %s", getUniformTypeName(type).c_str(), name);
-            ImGui::SameLine();
-
-            float fspeed = 0.1f;
-            // most common types of user defined uniforms
-            if (type == GL_FLOAT_VEC4) {
-                float val[4];
-                glm::vec4 uniform = shader.getVec4(name);
-                val[0] = uniform.r;
-                val[1] = uniform.g;
-                val[2] = uniform.b;
-                val[3] = uniform.a;
-                if (ImGui::ColorButton(name, ImVec4(val[0], val[1], val[2], val[3])))
-                    ImGui::OpenPopup("hi-picker");
-                if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
-                    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
-                    ImGui::ColorPicker4("##picker", val);
-                    shader.setVec4(name, val[0], val[1], val[2], val[3]);
-                    ImGui::EndPopup();
-                }
-            }
-            else if (type == GL_FLOAT_VEC3) {
-                float val[3];
-                glm::vec3 uniform = shader.getVec3(name);
-                val[0] = uniform.r;
-                val[1] = uniform.g;
-                val[2] = uniform.b;
-                if (ImGui::ColorButton(name, ImVec4(val[0], val[1], val[2], 1.0)))
-                    ImGui::OpenPopup("hi-picker");
-                if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
-                    if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
-                    ImGui::ColorPicker3("##picker", val);
-                    shader.setVec3(name, val[0], val[1], val[2]);
-                    ImGui::EndPopup();
-                }
-            }
-            else if (type == GL_FLOAT_VEC2) {
-                float val[2];
-                glm::vec2 uniform = shader.getVe2(name);
-                val[0] = uniform.x;
-                val[1] = uniform.y;
-                ImGui::DragFloat2("Vector 2", val, fspeed);
-                shader.setVec2(name, val[0], val[1]);
-            }
-            else if (type == GL_FLOAT) {
-                float val = shader.getFloat(name);
-                ImGui::DragFloat("Float", &val, fspeed);
-                shader.setFloat(name, val);
-            }
-            else if (type == GL_INT) {
-                int val = shader.getInt(name);
-                ImGui::DragInt("Integar", &val);
-                shader.setInt(name, val);
-            }
-            else if (type == GL_BOOL) {
-                bool val = shader.getBool(name);
-                ImGui::Checkbox("Boolean", &val);
-                shader.setBool(name, val);
-            }
-            else if (type)
-
-
-                ImGui::NewLine();
-            ImGui::PopID();
-        }
+//        {
+//            ImGui::PushFont(Fonts::boldFont);
+//            ImGui::Text("Shader Specifications: ");
+//            ImGui::PopFont();
+//            ImGui::Separator();
+//            ImGui::PushFont(Fonts::italicFont);
+//            ImGui::Text("Shader Files: ");
+//            ImGui::PopFont();
+//            float indent = 50.0f;
+//            ImGui::Indent(indent);
+//            auto shader = *SystemLocator::Get<RenderManager>().GetShaderManager().Get(
+//                    entity->GetComponent<MeshComponent>().m_ShaderName);
+//            ImGui::Text("%s", shader.m_VertexFile.c_str());
+//            ImGui::Text("%s", shader.m_FragmentFile.c_str());
+//            ImGui::Unindent(indent);
+//
+//            // - - - - - - - - //
+//
+//            // for every uniform display it correctly
+//            GLint count;
+//            unsigned int progID = shader.GetProgramIDCopy();
+//            glGetProgramiv(progID, GL_ACTIVE_UNIFORMS, &count);
+//
+//            ImGui::Text("Available Uniforms:");
+//            for (GLint i = 0; i < count; i++) {
+//                char name[128];
+//                GLint size; // m_Count of the variable
+//                GLenum type; // type of the variable (float, vec3 or mat4, etc)
+//                GLsizei length; // name length
+//                glGetActiveUniform(progID, (GLuint) i, sizeof(name), &length, &size, &type, name);
+//                // if uniform is one that is set internally by the editor mark it as so with some text
+//                bool isUneditable = false;
+//                for (const char *unedit_name: unedit_uniforms) {
+//                    if (std::strcmp(name, unedit_name) == 0) {
+//                        isUneditable = true;
+//                        break;
+//                    }
+//                }
+//                if (isUneditable) continue;
+//
+//                ImGui::PushID(typeid(MeshComponent).hash_code() + (int) (uint64_t) entity->GetUUID());
+//                ImGui::Text("%s : %s", getUniformTypeName(type).c_str(), name);
+//                ImGui::SameLine();
+//
+//                float fspeed = 0.1f;
+//                // most common types of user defined uniforms
+//                if (type == GL_FLOAT_VEC4) {
+//                    float val[4];
+//                    glm::vec4 uniform = shader.getVec4(name);
+//                    val[0] = uniform.r;
+//                    val[1] = uniform.g;
+//                    val[2] = uniform.b;
+//                    val[3] = uniform.a;
+//                    if (ImGui::ColorButton(name, ImVec4(val[0], val[1], val[2], val[3])))
+//                        ImGui::OpenPopup("hi-picker");
+//                    if (ImGui::BeginPopup("hi-picker",
+//                                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
+//                        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
+//                        ImGui::ColorPicker4("##picker", val);
+//                        shader.SetVec4(name, val[0], val[1], val[2], val[3]);
+//                        ImGui::EndPopup();
+//                    }
+//                } else if (type == GL_FLOAT_VEC3) {
+//                    float val[3];
+//                    glm::vec3 uniform = shader.getVec3(name);
+//                    val[0] = uniform.r;
+//                    val[1] = uniform.g;
+//                    val[2] = uniform.b;
+//                    if (ImGui::ColorButton(name, ImVec4(val[0], val[1], val[2], 1.0)))
+//                        ImGui::OpenPopup("hi-picker");
+//                    if (ImGui::BeginPopup("hi-picker",
+//                                          ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
+//                        if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
+//                        ImGui::ColorPicker3("##picker", val);
+//                        shader.SetVec3(name, val[0], val[1], val[2]);
+//                        ImGui::EndPopup();
+//                    }
+//                } else if (type == GL_FLOAT_VEC2) {
+//                    float val[2];
+//                    glm::vec2 uniform = shader.getVe2(name);
+//                    val[0] = uniform.x;
+//                    val[1] = uniform.y;
+//                    ImGui::DragFloat2("Vector 2", val, fspeed);
+//                    shader.SetVec2(name, val[0], val[1]);
+//                } else if (type == GL_FLOAT) {
+//                    float val = shader.getFloat(name);
+//                    ImGui::DragFloat("Float", &val, fspeed);
+//                    shader.SetFloat(name, val);
+//                } else if (type == GL_INT) {
+//                    int val = shader.getInt(name);
+//                    ImGui::DragInt("Integar", &val);
+//                    shader.SetInt(name, val);
+//                } else if (type == GL_BOOL) {
+//                    bool val = shader.getBool(name);
+//                    ImGui::Checkbox("Boolean", &val);
+//                    shader.SetBool(name, val);
+//                } else if (type)
+//
+//
+//                    ImGui::NewLine();
+//                ImGui::PopID();
+//            }
+//        }
 
     }
 
@@ -203,9 +203,63 @@ namespace Slate {
         ImGui::Text("script");
     }
 
+    void ComponentDirectionalLight(Entity* entity) {
+        auto& light = entity->GetComponent<DirectionalLightComponent>();
+        ImGui::Text("%s", light.GetTypeName().c_str());
+        float val[3];
+        val[0] = light.Color.r;
+        val[1] = light.Color.g;
+        val[2] = light.Color.b;
+        if (ImGui::ColorButton(light.GetTypeName().c_str(), ImVec4(val[0], val[1], val[2], 1.0)))
+            ImGui::OpenPopup("hi-picker");
+        if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
+            ImGui::ColorPicker3("##picker", val);
+            light.Color = {val[0], val[1], val[2]};
+            ImGui::EndPopup();
+        }
+        ImGui::DragFloat("Strength", &light.Intensity, 0.5f, 0.0f, 1000.0f);
 
-    void ComponentLight(Entity* entity) {
-        ImGui::Text("%s", entity->GetComponent<LightComponent>().GetTypeName().c_str());
+
+    }
+    void ComponentPointLight(Entity* entity) {
+        auto& light = entity->GetComponent<PointLightComponent>();
+        ImGui::Text("%s", light.GetTypeName().c_str());
+        float val[3];
+        val[0] = light.Color.r;
+        val[1] = light.Color.g;
+        val[2] = light.Color.b;
+        if (ImGui::ColorButton(light.GetTypeName().c_str(), ImVec4(val[0], val[1], val[2], 1.0)))
+            ImGui::OpenPopup("hi-picker");
+        if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
+            ImGui::ColorPicker3("##picker", val);
+            light.Color = {val[0], val[1], val[2]};
+            ImGui::EndPopup();
+        }
+        ImGui::DragFloat("Intensity", &light.Intensity, 0.5f, 0.0f, 1000.0f);
+
+        ImGui::DragFloat("Range", &light.Range, 0.5f, 0.0f, 100.0f);
+
+    }
+    void ComponentSpotLight(Entity* entity) {
+        auto& light = entity->GetComponent<SpotLightComponent>();
+        ImGui::Text("%s", light.GetTypeName().c_str());
+        float val[3];
+        val[0] = light.Color.r;
+        val[1] = light.Color.g;
+        val[2] = light.Color.b;
+        if (ImGui::ColorButton(light.GetTypeName().c_str(), ImVec4(val[0], val[1], val[2], 1.0)))
+            ImGui::OpenPopup("hi-picker");
+        if (ImGui::BeginPopup("hi-picker", ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoDocking)) {
+            if (ImGui::IsKeyPressed(ImGui::GetKeyIndex(ImGuiKey_Enter))) ImGui::CloseCurrentPopup();
+            ImGui::ColorPicker3("##picker", val);
+            light.Color = {val[0], val[1], val[2]};
+            ImGui::EndPopup();
+        }
+        ImGui::DragFloat("Strength", &light.Intensity, 0.5f, 0.0f, 1000.0f);
+
+
     }
 
 
@@ -216,11 +270,14 @@ namespace Slate {
 
     using ComponentEntry = std::pair<const char*, std::type_index>;
     // make sure you update the m_Count of the array
-    std::array<ComponentEntry, 4> componentEntries = {{
+    std::array<ComponentEntry, 6> componentEntries = {{
         {"Transform", typeid(TransformComponent)},
         {"Script", typeid(ScriptComponent)},
         {"Mesh", typeid(MeshComponent)},
-        {"Light", typeid(LightComponent)}
+
+        {"Directional Light", typeid(DirectionalLightComponent)},
+        {"Point Light", typeid(PointLightComponent)},
+        {"Spot Light", typeid(SpotLightComponent)}
     }};
     // later i want the mesh components to be empty by default
     // the defauly action upon adding a new component to your entity
@@ -228,13 +285,19 @@ namespace Slate {
             {typeid(TransformComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<TransformComponent>(); }},
             {typeid(ScriptComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<ScriptComponent>(); }},
             {typeid(MeshComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<MeshComponent>(MeshCube()); }},
-            {typeid(LightComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<LightComponent>(); }},
+
+            {typeid(DirectionalLightComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<DirectionalLightComponent>(); }},
+            {typeid(PointLightComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<PointLightComponent>(); }},
+            {typeid(SpotLightComponent), [](Context* context){ context->m_ActiveEntity.AddComponent<SpotLightComponent>(); }},
     };
     std::unordered_map<std::type_index, std::function<bool(Context*)>> componentCheckers = {
             {typeid(TransformComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<TransformComponent>(); }},
             {typeid(ScriptComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<ScriptComponent>(); }},
             {typeid(MeshComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<MeshComponent>(); }},
-            {typeid(LightComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<LightComponent>(); }},
+
+            {typeid(DirectionalLightComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<DirectionalLightComponent>(); }},
+            {typeid(PointLightComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<PointLightComponent>(); }},
+            {typeid(SpotLightComponent), [](Context* context) { return context->m_ActiveEntity.HasComponent<SpotLightComponent>(); }},
     };
 
 
@@ -253,8 +316,13 @@ namespace Slate {
             // now each component will be listed below if available
             ComponentPropertyPanel<TransformComponent>(entity, ComponentTransformation, "Transform", ICON_LC_MOVE_3D);
             ComponentPropertyPanel<ScriptComponent>(entity, ComponentScript, "Script", ICON_LC_SCROLL);
-            ComponentPropertyPanel<LightComponent>(entity, ComponentLight, "Light", ICON_LC_LIGHTBULB);
             ComponentPropertyPanel<MeshComponent>(entity, ComponentMesh, "Mesh", ICON_LC_BLOCKS);
+
+            // various light components
+            ComponentPropertyPanel<DirectionalLightComponent>(entity, ComponentDirectionalLight, "Directional Light", ICON_LC_SUN);
+            ComponentPropertyPanel<PointLightComponent>(entity, ComponentPointLight, "Point Light", ICON_LC_LIGHTBULB);
+            ComponentPropertyPanel<SpotLightComponent>(entity, ComponentSpotLight, "Spot Light", ICON_LC_LAMP_CEILING);
+
 
 
             // add component button, also center it

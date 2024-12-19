@@ -11,11 +11,7 @@ add_subdirectory(engine)
 add_executable(${PROJECT_NAME}
         editor/src/main.cpp
         editor/src/Editor.cpp
-        editor/src/EditorLayer.cpp
         editor/src/ViewportCamera.cpp
-
-        editor/src/Window/Window.cpp
-        editor/src/Window/SettingsWindow.cpp
 
         editor/src/Gui/EditorGUI.cpp
         editor/src/Gui/Framebuffer.cpp

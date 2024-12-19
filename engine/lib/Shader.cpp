@@ -5,51 +5,52 @@
 #include "Slate/Files.h"
 #include "Slate/Expect.h"
 #include <glad/glad.h>
+
 #include <fstream>
 #include <sstream>
 #include <utility>
-#include <iostream>
 
 namespace Slate {
     // basic uniforms
-    void Shader::setBool(const char *name, bool value) const {
+    void Shader::SetBool(const std::string& name, bool value) const {
         // does the same thing as an int set cause there is no bool setter, i just want it to be pretty :)
-        this->setInt(name, (int) value);
+        this->SetInt(name, (int) value);
     }
-    void Shader::setInt(const char *name, int value) const {
+    void Shader::SetInt(const std::string& name, int value) const {
         // ALWAYS CHECK FOR ERRORS RETARD
         glProgramUniform1i(this->m_ProgramID,GetUniformLocation(name), value);
     }
-    void Shader::setFloat(const char *name, float value) const {
+    void Shader::SetFloat(const std::string& name, float value) const {
         glProgramUniform1f(this->m_ProgramID, GetUniformLocation(name), value);
     }
     // vector uniforms
-    void Shader::setVec2(const char *name, const glm::vec2 *value) const {
+    void Shader::SetVec2(const std::string& name, const glm::vec2 *value) const {
         glProgramUniform2fv(this->m_ProgramID, GetUniformLocation(name), 1, &(value->x));
     }
-    void Shader::setVec3(const char *name, const glm::vec3 *value) const {
+    void Shader::SetVec3(const std::string& name, const glm::vec3 *value) const {
         glProgramUniform3fv(this->m_ProgramID, GetUniformLocation(name), 1, &(value->x));
     }
-    void Shader::setVec4(const char *name, const glm::vec4 *value) const {
+    void Shader::SetVec4(const std::string& name, const glm::vec4 *value) const {
         glProgramUniform4fv(this->m_ProgramID, GetUniformLocation(name), 1, &(value->x));
     }
-    void Shader::setVec2(const char *name, float x, float y) const {
+    void Shader::SetVec2(const std::string& name, float x, float y) const {
         glProgramUniform2f(this->m_ProgramID, GetUniformLocation(name), x, y);
     }
-    void Shader::setVec3(const char *name, float x, float y, float z) const {
+    void Shader::SetVec3(const std::string& name, float x, float y, float z) const {
         glProgramUniform3f(this->m_ProgramID, GetUniformLocation(name), x, y, z);
     }
-    void Shader::setVec4(const char *name, float x, float y, float z, float w) const {
+
+    void Shader::SetVec4(const std::string& name, float x, float y, float z, float w) const {
         glProgramUniform4f(this->m_ProgramID, GetUniformLocation(name), x, y, z, w);
     }
     // matrix uniforms
-    void Shader::setMat2(const char *name, const glm::mat2 &mat) const {
+    void Shader::SetMat2(const std::string& name, const glm::mat2 &mat) const {
         glProgramUniformMatrix2fv(this->m_ProgramID, GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
     }
-    void Shader::setMat3(const char *name, const glm::mat3 &mat) const {
+    void Shader::SetMat3(const std::string& name, const glm::mat3 &mat) const {
         glProgramUniformMatrix3fv(this->m_ProgramID, GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
     }
-    void Shader::setMat4(const char *name, const glm::mat4 &mat) const {
+    void Shader::SetMat4(const std::string& name, const glm::mat4 &mat) const {
         glProgramUniformMatrix4fv(this->m_ProgramID, GetUniformLocation(name), 1, GL_FALSE, &mat[0][0]);
     }
 
@@ -93,10 +94,13 @@ namespace Slate {
         return {values[0], values[1], values[2], values[3]};
     }
     // cache locations
-    int Shader::GetUniformLocation(const char *name) const {
+    int Shader::GetUniformLocation(const std::string& name) const {
         if (m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
             return m_UniformLocationCache[name];
-        int location = glGetUniformLocation(m_ProgramID, name);
+        int location = glGetUniformLocation(this->m_ProgramID, name.c_str());
+        if (location == -1) {
+            fprintf(stderr, "Warning: Uniform '%s' does not exist or is not active in the shader program: '%s'\n", name.c_str(), m_Name.c_str());
+        }
         m_UniformLocationCache[name] = location;
         return location;
     }
@@ -106,13 +110,13 @@ namespace Slate {
         const std::string& filePath = fileName;
         std::ifstream file(filePath);
         if (!file.is_open()) {
-            printf("ERROR::SHADER::FILE_NOT_FOUND\n");
+            fprintf(stderr, "ERROR::SHADER::FILE_NOT_FOUND\n\t%s\n", fileName.c_str());
             return "";
         }
         std::stringstream buffer;
         buffer << file.rdbuf();
         if (buffer.str().empty()) {
-            printf("ERROR::SHADER::FILE_IS_EMPTY\n");
+            fprintf(stderr, "ERROR::SHADER::FILE_IS_EMPTY\n\t%s\n", fileName.c_str());
             return "";
         }
         return buffer.str();
@@ -127,8 +131,7 @@ namespace Slate {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &result);
         if (!result) {
             glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-            printf("ERROR::SHADER::%s::COMPILATION_FAILED\n%s\n",
-                   shadertype == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT", infoLog);
+            fprintf(stderr, "ERROR::SHADER::%s::COMPILATION_FAILED\n\t%s\n", (shadertype==GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT"), infoLog);
             glDeleteShader(shader);
             return 0;
         }
@@ -156,18 +159,17 @@ namespace Slate {
         // if compile status was not successful
         if (!result) {
             glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-            printf("ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
-            printf("(This is likely an error with how the shader itself is written.)\n");
+            fprintf(stderr, "ERROR::SHADER::PROGRAM::LINKING_FAILED\n%s\n", infoLog);
             glDeleteShader(vertexShader);
             glDeleteShader(fragmentShader);
             glDeleteProgram(shaderProgram);
-            return 1;
+            return 1; // EXIT_ERROR
         }
         // detach, not delete, in case we want to reuse shader ids for other programs
         glDetachShader(shaderProgram, vertexShader);
         glDetachShader(shaderProgram, fragmentShader);
 
-
         return shaderProgram;
     }
+
 }

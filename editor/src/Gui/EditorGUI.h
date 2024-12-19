@@ -8,15 +8,16 @@
 #include <imgui.h>
 #include <utility>
 
+#include <Slate/Application.h>
 #include "Panels/Panel.h"
 #include "Framebuffer.h"
-#include "../Window/Window.h"
 #include "../Context.h"
+#include "Slate/Window.h"
 
 namespace Slate {
     class EditorGUI {
     public:
-        EditorGUI();
+        EditorGUI() = default;
         ~EditorGUI() = default;
 
         void OnAttach(const Ref<Context> &context, const Ref<Framebuffer> &framebuffer);
@@ -28,7 +29,7 @@ namespace Slate {
         void ActualWindowUpdate() const;
 
         Ref<Framebuffer> m_Framebuffer;
-        Window* m_EditorWindow;
+        Window m_EditorWindow = SystemLocator::Get<WindowManager>().GetWindow();
         std::vector<Ref<Panel>> m_Panels;
     };
 

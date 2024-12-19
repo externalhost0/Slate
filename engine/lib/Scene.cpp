@@ -89,11 +89,24 @@ namespace Slate {
     {
 
     }
+    // LIGHT COMPONENTS //
     template<>
-    void Scene::OnComponentAdded<LightComponent>(Entity entity, LightComponent& component)
+    void Scene::OnComponentAdded<PointLightComponent>(Entity entity, PointLightComponent& component)
     {
 
     }
+    template<>
+    void Scene::OnComponentAdded<DirectionalLightComponent>(Entity entity, DirectionalLightComponent& component)
+    {
+
+    }
+    template<>
+    void Scene::OnComponentAdded<SpotLightComponent>(Entity entity, SpotLightComponent& component)
+    {
+
+    }
+    //              //
+
     template<>
     void Scene::OnComponentAdded<TextComponent>(Entity entity, TextComponent& component)
     {
