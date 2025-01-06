@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/13/24.
 //
 
-#ifndef SLATEEDITOR_IMGUISNIPPETS_H
-#define SLATEEDITOR_IMGUISNIPPETS_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include <functional>
@@ -41,7 +40,7 @@ namespace Slate {
         ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_AllowItemOverlap;
 
         // generate a unique id for the child window
-        std::string uniqueId = "Child" + std::to_string(typeid(ComponentType).hash_code()) + std::to_string(entity->operator uint32_t());
+        std::string uniqueId = "Child" + std::to_string(typeid(ComponentType).hash_code()) + std::to_string(static_cast<uint32_t>(entity->GetEntityHandle()));
         ImGui::BeginChild(uniqueId.c_str(), ImVec2(0, 0), childFlags);
 
         // this constructs the icon -> title -> and set tree visibillity
@@ -82,5 +81,3 @@ namespace Slate {
     }
 }
 
-
-#endif //SLATEEDITOR_IMGUISNIPPETS_H

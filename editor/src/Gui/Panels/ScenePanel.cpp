@@ -16,6 +16,7 @@ namespace Slate {
 
     std::vector<entt::entity> entity_order_vector;
     std::unordered_set<entt::entity> entitySet;
+
     void ScenePanel::OnImGuiUpdate() {
         ImGui::Begin("Scene Hierarchy");
         {
@@ -40,8 +41,8 @@ namespace Slate {
                 ImGui::EndPopup();
             }
             // quick lookups for entity additions and presence in scene
-            auto allEntities = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<CoreComponent>();
-            for (auto entityId: allEntities) {
+            auto allEntities = m_ActiveContext->m_ActiveScene->GetAllIDsWith<CoreComponent>();
+            for (auto entityId : allEntities) {
                 if (entitySet.find(entityId) == entitySet.end()) {
                     entity_order_vector.push_back(entityId);
                     entitySet.insert(entityId);
@@ -58,18 +59,15 @@ namespace Slate {
                 Entity entity = {entity_order_vector[i], m_ActiveContext->m_ActiveScene};
                 // scene panel actual content
                 float ypad = ImGui::GetFontSize() * 0.35f;
-                bool isSelected =
-                        entity.operator entt::entity() == m_ActiveContext->m_ActiveEntity.operator entt::entity();
+                bool isSelected = entity.GetEntityHandle() == m_ActiveContext->m_ActiveEntity.GetEntityHandle();
                 if (isSelected)
                     flags |= ImGuiTreeNodeFlags_Selected;
 
                 ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, ypad));
                 ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 0.0f);
                 if (isSelected)
-                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered,
-                                          Brighten(ImGui::GetStyleColorVec4(ImGuiCol_Header), 0.035f));
-                ImGui::TreeNodeEx((void *) (uint64_t) (uint32_t) entity, flags, " " ICON_LC_BOX "  %s",
-                                  entity.GetComponent<CoreComponent>().name.c_str());
+                    ImGui::PushStyleColor(ImGuiCol_HeaderHovered,Brighten(ImGui::GetStyleColorVec4(ImGuiCol_Header), 0.035f));
+                ImGui::TreeNodeEx((void *) entity.GetEntityHandle(), flags, " " ICON_LC_BOX "  %s", entity.GetComponent<CoreComponent>().name.c_str());
                 if (isSelected) ImGui::PopStyleColor();
                 ImGui::PopStyleVar(2);
                 // dragging and dropping functionality
@@ -116,7 +114,7 @@ namespace Slate {
                 if (ImGui::IsItemClicked())
                     m_ActiveContext->m_ActiveEntity = entity;
                 // right click menu on item, also use the entity id as a id for the popup
-                if (ImGui::BeginPopupContextItem(std::to_string((uint64_t) entity.operator entt::entity()).c_str())) {
+                if (ImGui::BeginPopupContextItem(std::to_string((uint64_t) entity.GetEntityHandle()).c_str())) {
                     m_ActiveContext->m_ActiveEntity = entity;
                     // name header
                     ImGui::PushFont(Fonts::boldFont);

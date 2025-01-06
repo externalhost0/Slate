@@ -25,9 +25,6 @@
     "name" : "vcpkg-cmake",
     "version>=" : "2024-04-23"
   }, {
-    "name" : "yaml-cpp",
-    "version>=" : "0.8.0#1"
-  }, {
     "name" : "assimp",
     "version>=" : "5.4.3"
   }, {
@@ -40,5 +37,8 @@
   }, {
     "name" : "stb",
     "version>=" : "2024-07-29#1"
+  }, {
+    "name" : "nativefiledialog-extended",
+    "version>=" : "1.2.1"
   } ]
 }

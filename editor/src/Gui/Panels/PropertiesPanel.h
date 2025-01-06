@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/10/24.
 //
 
-#ifndef SLATE_PROPERTIESPANEL_H
-#define SLATE_PROPERTIESPANEL_H
+#pragma once
 
 #include "Panel.h"
 
@@ -17,6 +16,3 @@ namespace Slate {
         PropertiesPanel() = default;
     };
 }
-
-
-#endif //SLATE_PROPERTIESPANEL_H

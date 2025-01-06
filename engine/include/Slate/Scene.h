@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/9/24.
 //
 
-#ifndef SLATE_SCENE_H
-#define SLATE_SCENE_H
+#pragma once
 
 #include <entt/entt.hpp>
 #include "UUID.h"
@@ -28,12 +27,21 @@ namespace Slate {
         Entity CreateEntity(const std::string& name = std::string());
         Entity CreateEntity(UUID uuid, const std::string& name = std::string());
         Entity DuplicateEntity(Entity entity);
-
         void DestroyEntity(Entity entity);
 
         template<typename... Components>
-        auto GetAllEntitiesWith() {
+        auto GetAllIDsWith() {
             return m_Registry.view<Components...>();
+        }
+
+        template<typename... Components>
+        auto GetAllEntitiesWith() {
+            auto view = m_Registry.view<Components...>();
+            std::vector<Entity> entity_vector;
+            for (auto id : view) {
+                entity_vector.emplace_back(id, this);
+            }
+            return entity_vector;
         }
 
     private:
@@ -46,5 +54,3 @@ namespace Slate {
         friend class Entity;
     };
 }
-
-#endif //SLATE_SCENE_H

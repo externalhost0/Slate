@@ -1,8 +1,7 @@
 //
 // Created by Hayden Rivas on 10/30/24.
 //
-#ifndef SLATE_GRAPHICS_H
-#define SLATE_GRAPHICS_H
+#pragma once
 
 #include <glad/glad.h>
 #include "Scene.h"
@@ -30,5 +29,6 @@ namespace Slate {
     private:
         ShaderLibrary* m_ShaderLib;
     };
+
+
 }
-#endif //SLATE_GRAPHICS_H

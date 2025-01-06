@@ -18,7 +18,10 @@ namespace Slate {
 #ifdef __APPLE__
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
-        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
+#ifdef DEBUG
+        glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+#endif
+
 
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -27,16 +30,19 @@ namespace Slate {
         glfwWindowHint(GLFW_RED_BITS, mode->redBits);
         glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
         m_WindowSpecification.m_RefreshRate = mode->refreshRate;
+
+        glfwWindowHint(GLFW_SCALE_FRAMEBUFFER, GLFW_TRUE);
 
         // some small testing to set fullscreen/borderless/windowed
         // we take everything as is recieved from mode if Fullscreen is asked
         unsigned int width = mode->width;
         unsigned int height = mode->height;
-        if (m_WindowSpecification.m_VideoMode == BORDERLESS_FULLSCREEN) {
+        if (m_WindowSpecification.m_VideoMode == VIDEO_MODE::BORDERLESS_FULLSCREEN) {
             monitor = nullptr;
-        } else if (m_WindowSpecification.m_VideoMode == WINDOWED) {
+        } else if (m_WindowSpecification.m_VideoMode == VIDEO_MODE::WINDOWED) {
             monitor = nullptr;
             width = m_WindowSpecification.m_WindowWidth;
             height = m_WindowSpecification.m_WindowHeight;

@@ -3,11 +3,12 @@
 //
 
 #include "Slate/Expect.h"
+#include "Slate/Files.h"
 #include "Slate/ShaderLibrary.h"
 
 namespace Slate {
     Ref<Shader> ShaderLibrary::Load(const std::string& name, const std::string& vertSrc, const std::string& fragSrc) {
-        auto shader = CreateRef<Shader>(name, vertSrc, fragSrc);
+        auto shader = CreateRef<Shader>(name, ToDirectory(vertSrc), ToDirectory(fragSrc));
         Add(name, shader);
         return shader;
     }
@@ -32,10 +33,9 @@ namespace Slate {
     }
 
     void ShaderLibrary::Setup() {
-        Load("null", "../editor/assets/shaders/vertex/static.vert", "../editor/assets/shaders/fragment/null.frag");
-        Load("solid_color", "../editor/assets/shaders/vertex/static.vert", "../editor/assets/shaders/fragment/solid_color.frag");
-        Load("normals_only", "../editor/assets/shaders/vertex/static.vert", "../editor/assets/shaders/fragment/normalsonly.frag");
-        Load("overdraw", "../editor/assets/shaders/vertex/static.vert", "../editor/assets/shaders/fragment/overdraw.frag");
+        Load("null", "assets/shaders/vertex/static_PNT.vert", "assets/shaders/fragment/null.frag");
+        Load("solid_color", "assets/shaders/vertex/static_PNT.vert", "assets/shaders/fragment/entity_solidcolor.frag");
+        Load("normals_only", "assets/shaders/vertex/static_PNT.vert", "assets/shaders/fragment/entity_normalsonly.frag");
 
     }
 

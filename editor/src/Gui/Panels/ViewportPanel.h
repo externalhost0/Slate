@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/10/24.
 //
 
-#ifndef SLATE_VIEWPORTPANEL_H
-#define SLATE_VIEWPORTPANEL_H
+#pragma once
 
 #include "imgui.h"
 #include "ImGuizmo.h"
@@ -39,11 +38,10 @@ namespace Slate {
         Ref<Framebuffer> m_Framebuffer;
         ViewportModes m_ViewportMode = ViewportModes::SHADED;
         Entity m_HoveredEntity;
+
         void OnAttach() override;
         void OnImGuiUpdate() override;
         void OnDetach() override;
         void IndependentInput() override;
     };
 }
-
-#endif //SLATE_VIEWPORTPANEL_H

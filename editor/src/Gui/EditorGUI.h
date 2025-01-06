@@ -2,14 +2,13 @@
 // Created by Hayden Rivas on 11/2/24.
 //
 
-#ifndef SLATE_GUI_H
-#define SLATE_GUI_H
+#pragma once
 
 #include <imgui.h>
 #include <utility>
 
 #include <Slate/Application.h>
-#include "Panels/Panel.h"
+#include "panels/Panel.h"
 #include "Framebuffer.h"
 #include "../Context.h"
 #include "Slate/Window.h"
@@ -36,4 +35,3 @@ namespace Slate {
     // styles.cpp
     void StyleStandard(ImGuiStyle *dst = nullptr);
 }
-#endif //SLATE_GUI_H

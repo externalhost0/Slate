@@ -20,14 +20,14 @@ namespace Slate {
         ImGui::StyleColorsDark();
         ImGuiStyle *style = dst ? dst : &ImGui::GetStyle();
         {
-            style->DockingSeparatorSize = 2.0f;
+            style->DockingSeparatorSize = 1.0f;
             style->FrameBorderSize = 1.0f;
             style->FramePadding = ImVec2(10.0f, 4.0f);
             style->TabBarBorderSize = 2.0f;
             style->TabBarOverlineSize = 1.0f;
             style->WindowBorderSize = 1.0f; // for the thick borders on everything
             style->PopupBorderSize = 1.0f; // for those nice borders around things like menus
-            style->ScrollbarSize = 10.0f;
+            style->ScrollbarSize = 13.0f;
 
             style->WindowRounding = 2.0f;
             style->ScrollbarRounding = 0.0f;
@@ -69,7 +69,7 @@ namespace Slate {
             colors[ImGuiCol_ButtonActive] = ImVec4(0.20f, 0.22f, 0.23f, 1.00f);
 
             colors[ImGuiCol_Header] = ImVec4(0.03f, 0.03f, 0.03f, 0.72f);
-            colors[ImGuiCol_HeaderHovered] = ImVec4(0.20f, 0.22f, 0.23f, 0.3f);
+            colors[ImGuiCol_HeaderHovered] = ImVec4(0.20f, 0.22f, 0.23f, 0.6f);
             colors[ImGuiCol_HeaderActive] = ImVec4(0.20f, 0.22f, 0.23f, 0.53f);
 
             colors[ImGuiCol_Separator] = ImVec4(0.28f, 0.28f, 0.28f, 0.49f);

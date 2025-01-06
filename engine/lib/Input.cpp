@@ -17,7 +17,7 @@ namespace Slate {
     glm::vec2 InputManager::GetMousePosition() {
         double x_pos, y_pos;
         glfwGetCursorPos(SystemLocator::Get<WindowManager>().GetWindow().GetNativeWindow(), &x_pos, &y_pos);
-        return {(float) x_pos, (float) y_pos };
+        return {static_cast<float>(x_pos), static_cast<float>(y_pos) };
     }
 
     int InputManager::GetInputMode() {

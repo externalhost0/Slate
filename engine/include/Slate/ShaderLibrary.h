@@ -2,8 +2,8 @@
 // Created by Hayden Rivas on 11/25/24.
 //
 
-#ifndef SLATEEDITOR_SHADERLIBRARY_H
-#define SLATEEDITOR_SHADERLIBRARY_H
+#pragma once
+
 #include "Ref.h"
 #include "IManager.h"
 #include "Shader.h"
@@ -27,4 +27,3 @@ namespace Slate {
     };
 
 }
-#endif //SLATEEDITOR_SHADERLIBRARY_H

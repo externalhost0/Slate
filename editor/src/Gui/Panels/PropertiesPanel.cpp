@@ -11,6 +11,9 @@
 #include "../Fonts.h"
 #include "../ImGuiSnippets.h"
 
+#include <nfd.h>
+#include <iostream>
+
 namespace Slate {
     std::string getUniformTypeName(GLenum type) {
         switch (type) {
@@ -67,6 +70,7 @@ namespace Slate {
         glm::mat4 localRotationMatrix = glm::mat4_cast(rotationQuat);
         glm::vec3 localRotation = glm::eulerAngles(rotationQuat);
         localRotation = glm::degrees(localRotation);
+        // broken as of now
         Vector3Drag("Rotation", localRotation, width, 0.0f, 0.1f);
         // now set it back to the rotation
         transform.Rotation = localRotation;
@@ -92,6 +96,66 @@ namespace Slate {
         }
 
         ImGui::Spacing();
+
+
+        const char* items[] = { "Cube", "Quad", "Plane", "User" };
+        static int selectedItem = -1; // -1 means no item is selected
+        if (ImGui::BeginCombo("Select an option", selectedItem == -1 ? "None" : items[selectedItem])) {
+            for (int i = 0; i < IM_ARRAYSIZE(items); i++) {
+                bool isSelected = (selectedItem == i);
+                if (ImGui::Selectable(items[i], isSelected)) {
+                    selectedItem = i;
+
+                    // Perform an action based on the selected item
+                    switch (selectedItem) {
+                        case 0:
+                            std::cout << "Option 1 selected: Performing action 1\n";
+                            break;
+                        case 1:
+                            std::cout << "Option 2 selected: Performing action 2\n";
+                            break;
+                        case 2:
+                            std::cout << "Option 3 selected: Performing action 3\n";
+                            break;
+                        case 3:
+                            std::cout << "Option 4 selected: Performing action 4\n";
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (isSelected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndCombo();
+        }
+
+        if (ImGui::Button("Import Mesh")) {
+            nfdu8char_t *outPath;
+            nfdu8filteritem_t filters[4] = {
+                    { "OBJ", "obj" },
+                    { "STL", "stl" },
+                    { "GTLF", "gtlf" },
+                    { "FBX", "fbx" }
+            };
+            nfdopendialogu8args_t args = {nullptr};
+            args.filterList = filters;
+            args.filterCount = 4;
+            nfdresult_t result = NFD_OpenDialogU8_With(&outPath, &args);
+            if (result == NFD_OKAY) {
+                printf("Successfully Imported: '%s'\n", outPath);
+                // remakes mesh component
+                entity->RemoveComponent<MeshComponent>();
+                entity->AddComponent<MeshComponent>(MeshImport("Basic", outPath));
+
+                NFD_FreePathU8(outPath);
+            }
+            else {
+                fprintf(stderr, "Error: %s\n", NFD_GetError());
+            }
+
+        }
+
 //        {
 //            ImGui::PushFont(Fonts::boldFont);
 //            ImGui::Text("Shader Specifications: ");
@@ -218,8 +282,7 @@ namespace Slate {
             light.Color = {val[0], val[1], val[2]};
             ImGui::EndPopup();
         }
-        ImGui::DragFloat("Strength", &light.Intensity, 0.5f, 0.0f, 1000.0f);
-
+        ImGui::DragFloat("Strength", &light.Intensity, 0.05f, 0.0f, 1000.0f);
 
     }
     void ComponentPointLight(Entity* entity) {
@@ -237,7 +300,7 @@ namespace Slate {
             light.Color = {val[0], val[1], val[2]};
             ImGui::EndPopup();
         }
-        ImGui::DragFloat("Intensity", &light.Intensity, 0.5f, 0.0f, 1000.0f);
+        ImGui::DragFloat("Intensity", &light.Intensity, 0.05f, 0.0f, 1000.0f);
 
         ImGui::DragFloat("Range", &light.Range, 0.5f, 0.0f, 100.0f);
 
@@ -257,8 +320,10 @@ namespace Slate {
             light.Color = {val[0], val[1], val[2]};
             ImGui::EndPopup();
         }
-        ImGui::DragFloat("Strength", &light.Intensity, 0.5f, 0.0f, 1000.0f);
+        ImGui::DragFloat("Strength", &light.Intensity, 0.05f, 0.0f, 1000.0f);
 
+        ImGui::DragFloat("Size", &light.Size, 0.1f, 1.0f, 180.f);
+        ImGui::DragFloat("Blend", &light.Blend, 0.01f, 0.0f, 1.0f);
 
     }
 

@@ -4,8 +4,7 @@
 
 
 
-#ifndef SLATE_ENTITY_H
-#define SLATE_ENTITY_H
+#pragma once
 
 #include <entt/entt.hpp>
 
@@ -20,20 +19,16 @@ namespace Slate {
         Entity() : m_EntityHandle(entt::null), m_Scene(nullptr){}
         Entity(entt::entity handle, Scene* scene);
         Entity(const Entity& other) = default;
-
-        UUID ID{};
+    public:
         UUID GetUUID() const { return ID; }
+        entt::entity GetEntityHandle() const { return m_EntityHandle; }
 
         static Entity Null; // way to compare entity as null, trying to be analogous to entt::null
 
         // comparison operators
         bool operator==(const Entity& other) const { return m_EntityHandle == other.m_EntityHandle; }
+        bool operator!=(const Entity& other) const { return !(*this == other); }
         explicit operator bool() const { return m_EntityHandle != entt::null && this != &Entity::Null; }
-        explicit operator uint32_t() const { return (uint32_t) m_EntityHandle; }
-
-        // explict requires that we cast it later, may be good or bad idk but itst just more work
-        explicit operator entt::entity() const { return m_EntityHandle; }
-
 
 
         // general ecs functionality
@@ -71,9 +66,11 @@ namespace Slate {
         }
 
     private:
+        UUID ID{};
         entt::entity m_EntityHandle{entt::null};
         Scene* m_Scene = nullptr;
+
+        friend class Scene;
     };
 }
 
-#endif //SLATE_ENTITY_H

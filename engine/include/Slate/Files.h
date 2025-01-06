@@ -1,14 +1,12 @@
 //
 // Created by Hayden Rivas on 10/30/24.
 //
-#ifndef SLATE_FILES_H
-#define SLATE_FILES_H
+#pragma once
 
 #include <cstdlib>
 #include <cstdio>
 #include <string>
 #include "IManager.h"
-
 
 namespace Slate {
     class FileManager : public IManager {
@@ -18,6 +16,7 @@ namespace Slate {
         friend class Application;
     private:
     };
-}
 
-#endif //SLATE_FILES_H
+    std::string loadCurrentDirectoryLocation();
+    std::string ToDirectory(const std::string& path);
+}

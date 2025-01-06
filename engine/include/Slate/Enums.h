@@ -2,21 +2,19 @@
 // Created by Hayden Rivas on 11/11/24.
 //
 
-#ifndef SLATEEDITOR_ENUMS_H
-#define SLATEEDITOR_ENUMS_H
+#pragma once
 
 namespace Slate {
 // editor window modes
-    enum VIDEO_MODE {
+    enum class VIDEO_MODE : unsigned char {
         FULLSCREEN,
         BORDERLESS_FULLSCREEN,
         WINDOWED,
     };
-    enum SHADERMODE {
+    enum class SHADERMODE : unsigned char {
         STANDARD,
         NORMALS_ONLY,
         SOLIDWHITE
     };
 }
 
-#endif //SLATEEDITOR_ENUMS_H

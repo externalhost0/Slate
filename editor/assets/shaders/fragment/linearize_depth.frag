@@ -13,7 +13,7 @@ void main() {
     float depth = texture(u_DepthTexture, TexCords).r;
     // linearize depth
     float linearDepth = (2.0 * u_Near * u_Far) / (u_Far + u_Near - (u_Far - u_Near) * (2.0 * depth - 1.0));
-    // normalize
+    // normalize it from camera planes
     float normalizedDepth = (linearDepth - u_Near) / (u_Far - u_Near);
     // apply gamma correction
     float correctedDepth = pow(normalizedDepth, 1.0 / u_Gamma);

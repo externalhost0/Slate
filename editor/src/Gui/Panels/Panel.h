@@ -2,12 +2,9 @@
 // Created by Hayden Rivas on 11/10/24.
 //
 
-#ifndef SLATE_PANEL_H
-#define SLATE_PANEL_H
+#pragma once
 
-#include "Slate/Scene.h"
 #include "Slate/Ref.h"
-#include "Slate/Entity.h"
 #include "../../Context.h"
 
 namespace Slate {
@@ -28,5 +25,3 @@ namespace Slate {
         friend class EditorGUI;
     };
 }
-
-#endif //SLATE_PANEL_H

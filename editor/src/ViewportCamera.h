@@ -2,21 +2,17 @@
 // Created by Hayden Rivas on 11/7/24.
 //
 
-#ifndef SLATE_VIEWPORTCAMERA_H
-#define SLATE_VIEWPORTCAMERA_H
+#pragma once
 
 #include <glm/glm.hpp>
 #include "Slate/Scene.h"
 #include "Slate/Ref.h"
 #include "Context.h"
 
-#include "yaml-cpp/yaml.h"
 
 namespace Slate {
     class ViewportCamera {
     public:
-        ViewportCamera();
-        explicit ViewportCamera(YAML::Node configfile);
 
         glm::mat4& GetProjectionMatrix() { return m_ProjectionMatrix; };
         glm::mat4& GetViewMatrix() { return m_ViewMatrix; };
@@ -42,10 +38,10 @@ namespace Slate {
         glm::mat4 m_ViewMatrix{};
         // properties
         float m_CameraActualSpeed{};
-        float m_ZFar;
-        float m_ZNear;
-        int m_FOV;
-        float m_AspectRatio{};
+        float m_ZFar{100.0f};
+        float m_ZNear{1.f};
+        int m_FOV{65};
+        float m_AspectRatio{1.33f};
 
         void MouseUpdate();
         void ProcessMouse(float xoffset, float yoffset);
@@ -54,5 +50,3 @@ namespace Slate {
     };
 
 }
-
-#endif //SLATE_VIEWPORTCAMERA_H

@@ -1,16 +1,16 @@
 //
 // Created by Hayden Rivas on 12/6/24.
 //
-
-#ifndef SLATEEDITOR_FONT_H
-#define SLATEEDITOR_FONT_H
+#pragma once
 
 #include "Ref.h"
 #include "IManager.h"
 
 #include <map>
+#include <unordered_map>
 #include <cstdio>
 #include <filesystem>
+
 #include <glm/vec2.hpp>
 
 #include <ft2build.h>
@@ -65,4 +65,3 @@ namespace Slate {
         bool Exists(const std::string &name);
     };
 }
-#endif //SLATEEDITOR_FONT_H

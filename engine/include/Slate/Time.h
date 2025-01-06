@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/11/24.
 //
 
-#ifndef SLATE_TIME_H
-#define SLATE_TIME_H
+#pragma once
 
 #include <chrono>
 
@@ -34,5 +33,3 @@ namespace Slate {
         friend class Application;
     };
 }
-
-#endif //SLATE_TIME_H

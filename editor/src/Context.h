@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/12/24.
 //
 
-#ifndef SLATEEDITOR_CONTEXT_H
-#define SLATEEDITOR_CONTEXT_H
+#pragma once
 
 #include <Slate/Entity.h>
 #include <Slate/Enums.h>
@@ -17,7 +16,6 @@ namespace Slate {
     struct Context {
         Entity m_ActiveEntity;
         Scene* m_ActiveScene;
-        SHADERMODE m_ShaderMode{STANDARD};
+        SHADERMODE m_ShaderMode{SHADERMODE::STANDARD};
     };
 }
-#endif //SLATEEDITOR_CONTEXT_H

@@ -2,10 +2,9 @@
 // Created by Hayden Rivas on 11/11/24.
 //
 
-#ifndef SLATE_REF_H
-#define SLATE_REF_H
+#pragma once
 
-#include <functional>
+#include <memory>
 
 namespace Slate {
     // alias for std::shared_ptr
@@ -18,4 +17,3 @@ namespace Slate {
         return std::make_shared<T>(std::forward<Args>(args)...);
     }
 }
-#endif //SLATE_REF_H

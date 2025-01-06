@@ -13,9 +13,6 @@ void main() {
     vec4 sampled = vec4(1.0, 1.0, 1.0, texture(u_Texture, TexCoord).r);
     float cutout = 1.0 - sampled.a;
 
-    // Apply border thickness to the cutout
-
-
     o_FragColor = vec4(u_Color, cutout);
     o_EntityID = v_EntityID;
 }

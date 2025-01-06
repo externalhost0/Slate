@@ -1,8 +1,7 @@
 //
 // Created by Hayden Rivas on 11/11/24.
 //
-#ifndef SLATE_FONTS_H
-#define SLATE_FONTS_H
+#pragma once
 
 #include "imgui.h"
 namespace Slate {
@@ -16,4 +15,3 @@ namespace Slate {
         inline static ImFont* largeitalicFont;
     };
 }
-#endif //SLATE_FONTS_H

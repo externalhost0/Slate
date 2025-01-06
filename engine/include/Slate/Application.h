@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/27/24.
 //
 
-#ifndef SLATEEDITOR_APPLICATION_H
-#define SLATEEDITOR_APPLICATION_H
+#pragma once
 
 #include "Font.h"
 #include "Render.h"
@@ -92,4 +91,3 @@ namespace Slate {
     };
 }
 
-#endif //SLATEEDITOR_APPLICATION_H

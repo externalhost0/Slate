@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/5/24.
 //
 
-#ifndef SLATE_FRAMEBUFFER_H
-#define SLATE_FRAMEBUFFER_H
+#pragma once
 
 #include <vector>
 #include <Slate/Expect.h>
@@ -11,14 +10,10 @@
 namespace Slate {
     enum class FramebufferTextureFormat{
         None = 0,
-        RGBA8,
+        RGB8,
         RGBA16F,
         RED_INTEGER,
         DEPTH24STENCIL8,
-
-        // defaults
-        Color = RGBA8,
-        Depth = DEPTH24STENCIL8,
     };
 
     struct FramebufferTextureSpecification {
@@ -75,4 +70,3 @@ namespace Slate {
         const FramebufferSpecification &GetSpecification() const { return m_Specification; };
     };
 }
-#endif //SLATE_FRAMEBUFFER_H

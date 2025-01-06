@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 12/7/24.
 //
 
-#ifndef SLATEEDITOR_IMANAGER_H
-#define SLATEEDITOR_IMANAGER_H
+#pragma once
 
 namespace Slate {
     class IManager {
@@ -15,5 +14,3 @@ namespace Slate {
         virtual void Shutdown() = 0;
     };
 }
-
-#endif //SLATEEDITOR_IMANAGER_H

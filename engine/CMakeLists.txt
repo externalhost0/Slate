@@ -1,11 +1,5 @@
-cmake_minimum_required(VERSION 3.28)
-
-# dev defined properties
 set(PROJECT_NAME "SlateEngine")
-set(VERSION "0.0.1")
-
-project(${PROJECT_NAME} VERSION ${VERSION} LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 17)
+project(${PROJECT_NAME})
 
 # source files
 add_library(${PROJECT_NAME}
@@ -17,13 +11,15 @@ add_library(${PROJECT_NAME}
         lib/Files.cpp
         lib/Mesh.cpp
         lib/Shader.cpp
-
         lib/Entity.cpp
         lib/MeshImport.cpp
         lib/UUID.cpp
         lib/ShaderLibrary.cpp
         lib/Font.cpp
         lib/Window.cpp
+        include/Slate/MeshGenerators.h
+        lib/Math.cpp
+        include/Slate/Math.h
 )
 
 # packages
@@ -31,8 +27,11 @@ find_package(glfw3 CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(EnTT CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
+find_package(assimp CONFIG REQUIRED)
+
 find_package(Freetype REQUIRED)
 find_package(Stb REQUIRED)
+
 
 
 # include and link it
@@ -49,5 +48,6 @@ target_link_libraries(${PROJECT_NAME}
             glfw
             glad::glad
             EnTT::EnTT
+            assimp::assimp
             Freetype::Freetype
 )

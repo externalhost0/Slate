@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/10/24.
 //
 
-#ifndef SLATE_SCENEPANEL_H
-#define SLATE_SCENEPANEL_H
+#pragma once
 
 #include "Slate/Entity.h"
 
@@ -22,5 +21,3 @@ namespace Slate {
 
     };
 }
-
-#endif //SLATE_SCENEPANEL_H

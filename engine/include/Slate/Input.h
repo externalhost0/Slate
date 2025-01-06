@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 10/30/24.
 //
 
-#ifndef SLATE_INPUT_H
-#define SLATE_INPUT_H
+#pragma once
 
 #include "GLFW/glfw3.h"
 #include <glm/glm.hpp>
@@ -27,4 +26,3 @@ namespace Slate {
     };
 
 }
-#endif //SLATE_INPUT_H

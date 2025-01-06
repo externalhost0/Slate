@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/22/24.
 //
 
-#ifndef SLATEEDITOR_SHADER_H
-#define SLATEEDITOR_SHADER_H
+#pragma once
 
 #include <string>
 #include <glm/vec2.hpp>
@@ -61,5 +60,3 @@ namespace Slate {
         int GetUniformLocation(const std::string& name) const;
     };
 }
-
-#endif //SLATEEDITOR_SHADER_H

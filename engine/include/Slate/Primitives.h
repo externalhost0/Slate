@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 10/30/24.
 //
 
-#ifndef SLATE_PRIMITIVES_H
-#define SLATE_PRIMITIVES_H
+#pragma once
 
 namespace Slate::Primitives {
 
@@ -14,17 +13,17 @@ namespace Slate::Primitives {
 // should be flowing counter clockwise (CCW)
     constexpr float quadVertices2D[] = {
             // positions               // texCoords
-            -1.0f, 1.0f,  0.0f, 1.0f, // top left
-            -1.0f, -1.0f, 0.0f, 0.0f, // bottom left
-            1.0f, -1.0f, 1.0f, 0.0f, // bottom right
-            1.0f, 1.0f, 1.0f, 1.0f // top right
+            -1.f, 1.f,  0.f, 1.f, // top left
+            -1.f, -1.f, 0.f, 0.f, // bottom left
+            1.f, -1.f, 1.f, 0.f, // bottom right
+            1.f, 1.f, 1.f, 1.f // top right
     };
     constexpr float quadVertices3D[] = {
             // positions                           // texCoords
-            -1.0f, 1.0f, 1.0f,    0.0f, 1.0f, // top left
-            -1.0f, -1.0f, 1.0f,  0.0f, 0.0f, // bottom left
-            1.0f, -1.0f, 1.0f, 1.0f, 0.0f, // bottom right
-            1.0f, 1.0f, 1.0f,  1.0f, 1.0f // top right
+            -1.f, 1.f, 1.f,    0.f, 1.f, // top left
+            -1.f, -1.f, 1.f,  0.f, 0.f, // bottom left
+            1.f, -1.f, 1.f, 1.f, 0.f, // bottom right
+            1.f, 1.f, 1.f,  1.f, 1.f // top right
     };
 
 
@@ -32,13 +31,12 @@ namespace Slate::Primitives {
             0, 1, 3,   // first triangle
             1, 2, 3    // second triangle
     };
-
     constexpr float planeVertices[] = {
             // Position                          // Normal                         // TexCoord
-            -1.0f,  1.0f, 1.0f,   0.0f,  0.0f, -1.0f,  0.0f, 1.0f,  // Top left
-            -1.0f, -1.0f, 1.0f,  0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // Bottom left
-            1.0f, -1.0f, 1.0f,  0.0f, 0.0f, -1.0f,  1.0f, 0.0f, // Bottom right
-            1.0f,  1.0f, 1.0f, 0.0f, 0.0f, -1.0f,  1.0f, 1.0f // Top right
+            -1.f, 0.f,   -1.f,   0.f,  1.f,  0.f,   0.f, 1.f,  // Top left
+            -1.f, 0.f,   1.f,    0.f, 1.f, 0.f,  0.f, 0.f, // Bottom left
+            1.f, 0.f,   1.f,    0.f, 1.f, 0.f, 1.f, 0.f, // Bottom right
+            1.f, 0.f, -1.f,  0.f, 1.f, 0.f, 1.f, 1.f // Top right
     };
     constexpr unsigned int planeIndices[] = {
             0, 1, 3,
@@ -47,32 +45,32 @@ namespace Slate::Primitives {
 
     const float cubeVertices[] = {
             // Position                                 // Normal                                   // TexCoord
-            -1.0f,  -1.0f,  -1.0f,      0.0f,  0.0f,  -1.0f,           0.0f, 0.0f,  // A 0
-            1.0f,   -1.0f, -1.0f,     0.0f,  0.0f,  -1.0f,         1.0f, 0.0f,  // B 1
-            1.0f,   1.0f,  -1.0f,    0.0f,  0.0f,  -1.0f,       1.0f, 1.0f,  // C 2
-            -1.0f,  1.0f,  -1.0f,   0.0f,  0.0f,  -1.0f,       0.0f, 1.0f,  // D 3
-            -1.0f, -1.0f, 1.0f,     0.0f,  0.0f,  1.0f,         0.0f, 0.0f,  // E 4
-            1.0f,  -1.0f,  1.0f,    0.0f,  0.0f,  1.0f,        1.0f, 0.0f,   // F 5
-            1.0f,   1.0f,  1.0f,    0.0f,  0.0f,  1.0f,        1.0f, 1.0f,   // G 6
-            -1.0f,  1.0f,  1.0f,    0.0f,  0.0f,  1.0f,         0.0f, 1.0f,   // H 7
+            -1.f,  -1.f,   -1.f,      0.f,  0.f,  -1.f,        0.f, 0.f,  // A 0
+            1.f,   -1.f,  -1.f,     0.f,  0.f,  -1.f,       1.f, 0.f,  // B 1
+            1.f,   1.f,  -1.f,    0.f,  0.f,  -1.f,       1.f, 1.f,  // C 2
+            -1.f,  1.f,  -1.f,   0.f,  0.f,  -1.f,       0.f, 1.f,  // D 3
+            -1.f, -1.f,  1.f,     0.f,  0.f,  1.f,       0.f, 0.f,  // E 4
+            1.f,  -1.f,  1.f,    0.f,  0.f,  1.f,        1.f, 0.f,   // F 5
+            1.f,   1.f,  1.f,    0.f,  0.f,  1.f,        1.f, 1.f,   // G 6
+            -1.f,  1.f,  1.f,    0.f,  0.f,  1.f,        0.f, 1.f,   // H 7
 
-            -1.0f,  1.0f, -1.0f,    -1.0f,  0.0f,  0.0f,         0.0f, 0.0f,  // D 8
-            -1.0f, -1.0f, -1.0f,    -1.0f,  0.0f,  0.0f,         1.0f, 0.0f,  // A 9
-            -1.0f, -1.0f,  1.0f,    -1.0f,  0.0f,  0.0f,         1.0f, 1.0f,  // E 10
-            -1.0f,  1.0f,  1.0f,    -1.0f,  0.0f,  0.0f,         0.0f, 1.0f,  // H 11
-            1.0f,  -1.0f, -1.0f,   1.0f,  0.0f,  0.0f,       0.0f, 0.0f,   // B 12
-            1.0f,  1.0f, -1.0f,  1.0f,  0.0f,  0.0f,     1.0f, 0.0f,   // C 13
-            1.0f,  1.0f,  1.0f,  1.0f,  0.0f,  0.0f,      1.0f, 1.0f,   // G 14
-            1.0f, -1.0f,  1.0f,  1.0f,  0.0f,  0.0f,     0.0f, 1.0f,   // F 15
+            -1.f,  1.f,  -1.f,    -1.f,  0.f,  0.f,      0.f, 0.f,  // D 8
+            -1.f, -1.f,  -1.f,    -1.f,  0.f,  0.f,      1.f, 0.f,  // A 9
+            -1.f, -1.f,  1.f,    -1.f,  0.f,  0.f,       1.f, 1.f,  // E 10
+            -1.f,  1.f,  1.f,    -1.f,  0.f,  0.f,       0.f, 1.f,  // H 11
+            1.f,  -1.f,  -1.f,   1.f,  0.f,  0.f,      0.f, 0.f,   // B 12
+            1.f,  1.f, -1.f,  1.f,  0.f,  0.f,      1.f, 0.f,   // C 13
+            1.f,  1.f,  1.f,  1.f,  0.f,  0.f,       1.f, 1.f,   // G 14
+            1.f, -1.f,  1.f,  1.f,  0.f,  0.f,      0.f, 1.f,   // F 15
 
-            -1.0f, -1.0f, -1.0f,  0.0f,  -1.0f,  0.0f,     0.0f, 0.0f,  // A 16
-            1.0f,  -1.0f, -1.0f,  0.0f,  -1.0f,  0.0f,    1.0f, 0.0f,   // B 17
-            1.0f,  -1.0f, 1.0f,  0.0f,  -1.0f,  0.0f,   1.0f, 1.0f,   // F 18
-            -1.0f, -1.0f, 1.0f,   0.0f,  -1.0f,  0.0f,     0.0f, 1.0f,  // E 19
-            1.0f,  1.0f, -1.0f,    0.0f,  1.0f,  0.0f,     0.0f, 0.0f,  // C 20
-            -1.0f, 1.0f, -1.0f,    0.0f,  1.0f,  0.0f,      1.0f, 0.0f,  // D 21
-            -1.0f, 1.0f,  1.0f,     0.0f,  1.0f,  0.0f,     1.0f, 1.0f,  // H 22
-            1.0f,  1.0f,  1.0f,     0.0f,  1.0f,  0.0f,     0.0f, 1.0f,  // G 23
+            -1.f, -1.f, -1.f,  0.f,  -1.f,  0.f,    0.f, 0.f,  // A 16
+            1.f,  -1.f, -1.f,  0.f,  -1.f,  0.f,    1.f, 0.f,   // B 17
+            1.f,  -1.f, 1.f,  0.f,  -1.f,  0.f,     1.f, 1.f,   // F 18
+            -1.f, -1.f, 1.f,   0.f,  -1.f,  0.f,     0.f, 1.f,  // E 19
+            1.f,  1.f,  -1.f,    0.f,  1.f,  0.f,    0.f, 0.f,  // C 20
+            -1.f, 1.f,  -1.f,    0.f,  1.f,  0.f,    1.f, 0.f,  // D 21
+            -1.f, 1.f,  1.f,     0.f,  1.f,  0.f,     1.f, 1.f,  // H 22
+            1.f,  1.f,  1.f,     0.f,  1.f,  0.f,    0.f, 1.f,  // G 23
     };
     const unsigned int cubeIndices[] = {
             // front and back
@@ -95,4 +93,3 @@ namespace Slate::Primitives {
 
 }
 
-#endif //SLATE_PRIMITIVES_H

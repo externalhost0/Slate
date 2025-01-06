@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 11/10/24.
 //
 
-#ifndef SLATE_ASSETSPANEL_H
-#define SLATE_ASSETSPANEL_H
+#pragma once
 
 #include "Panel.h"
 
@@ -17,5 +16,3 @@ namespace Slate {
     };
 }
 
-
-#endif //SLATE_ASSETSPANEL_H

@@ -1,8 +1,7 @@
 //
 // Created by Hayden Rivas on 11/3/24.
 //
-#ifndef SLATE_COMPONENTS_H
-#define SLATE_COMPONENTS_H
+#pragma once
 // my own header files
 #include "Render.h"
 #include "Mesh.h"
@@ -10,6 +9,8 @@
 #include "UUID.h"
 #include "Shader.h"
 #include "Application.h"
+#include "MeshGenerators.h"
+
 // not my own
 #include <glm/glm.hpp>
 #include <string>
@@ -17,6 +18,7 @@
 #include <utility>
 #include <filesystem>
 #include <assimp/scene.h>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/quaternion.hpp>
 
@@ -26,7 +28,7 @@ namespace Slate {
 
     class MeshComponent {
     public:
-        bool m_IsYScalable{true};
+        bool m_Is2D{false};
         std::string m_ShapeName{"Unnamed Mesh"};
         std::string m_ShaderName{"null"};
         std::string m_Directory;
@@ -34,49 +36,26 @@ namespace Slate {
     public:
         // every mesh requires a shader to even be shown, this is the error shader if none is recieved ??
 //        Ref<Shader> GetMeshShader() { return SystemLocator::Get<RenderManager>().GetShaderManager().Get(m_ShaderName); };
+        MeshComponent() = default;
+        ~MeshComponent() = default;
+    public:
 
-        // 3 types of constructors:
-        MeshComponent(std::string shadername, std::string shapename, bool i2D, const Vertices& vertices, const Elements& elements)
-        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsYScalable(i2D)
-        {
-            // standard layout for most things, could add more data if necessary
-            LayoutBuffer standardlayout = {
-                    {ShaderDataType::Float3, "a_Position"},
-                    {ShaderDataType::Float3, "a_Normal"},
-                    {ShaderDataType::Float2, "a_TexCoord"}
-            };
-            m_Meshes.emplace_back(vertices, elements, standardlayout);
-        }
-        MeshComponent(std::string shadername, std::string shapename, bool i2D, const Vertices& vertices, const Elements& elements, const LayoutBuffer& layout)
-        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsYScalable(i2D)
-        {
-            m_Meshes.emplace_back(vertices, elements, layout);
-        }
-        MeshComponent(std::string shadername, std::string shapename, bool i2D, const Vertices& vertices, const LayoutBuffer& layout)
-        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsYScalable(i2D)
-        {
-            m_Meshes.emplace_back(vertices, layout);
-        }
+        // with elements
         MeshComponent(std::string shadername, std::string shapename, bool i2D, GLint mode, const Vertices& vertices, const LayoutBuffer& layout)
-        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsYScalable(i2D)
+        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_Is2D(i2D)
         {
             m_Meshes.emplace_back(vertices, layout, mode);
         }
-        MeshComponent(std::string shadername, std::string shapename, bool i2D, const Vertices& vertices)
-                : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_IsYScalable(i2D)
+        // without elements
+        MeshComponent(std::string shadername, std::string shapename, bool i2D, GLint mode, const Vertices& vertices, const Elements& elements, const LayoutBuffer& layout)
+        : m_ShaderName(std::move(shadername)), m_ShapeName(std::move(shapename)), m_Is2D(i2D)
         {
-            LayoutBuffer standardlayout = {
-                    {ShaderDataType::Float3, "a_Position"},
-                    {ShaderDataType::Float3, "a_Normal"},
-                    {ShaderDataType::Float2, "a_TexCoord"}
-            };
-            m_Meshes.emplace_back(vertices, standardlayout);
+            m_Meshes.emplace_back(vertices, elements, layout, mode);
         }
 
         // imported
         MeshComponent(std::string shaderName, std::string name, bool i2D, const std::string& filePath)
-        : m_ShaderName(std::move(shaderName)), m_ShapeName(std::move(name)), m_IsYScalable(i2D),
-          m_Directory(filePath)
+        : m_ShaderName(std::move(shaderName)), m_ShapeName(std::move(name)), m_Is2D(i2D), m_Directory(filePath)
         {
             loadModel(filePath);
         }
@@ -90,26 +69,36 @@ namespace Slate {
         // for adding via component call
         MeshCube() : MeshCube("null") {}
         explicit MeshCube(const std::string& shaderName)
-        : MeshComponent(shaderName, "Cube", false,
-                {Primitives::cubeVertices, sizeof (Primitives::cubeVertices)},
-                {Primitives::cubeIndices, sizeof (Primitives::cubeIndices)}
+        : MeshComponent(shaderName, "Cube", false, GL_TRIANGLES,
+                Vertices{Primitives::cubeVertices},
+                Elements{Primitives::cubeIndices},
+                        {
+                                {ShaderDataType::Float3, "a_Position"},
+                                {ShaderDataType::Float3, "a_Normal"},
+                                {ShaderDataType::Float2, "a_TexCoord"}
+                        }
         ) {}
     };
     struct MeshPlane : MeshComponent {
         // for adding via component call
         MeshPlane() : MeshPlane("null") {}
         explicit MeshPlane(const std::string& shaderName)
-        : MeshComponent(shaderName, "Plane", false,
-                {Primitives::planeVertices, sizeof (Primitives::planeVertices)},
-                {Primitives::planeIndices, sizeof (Primitives::planeIndices)}
+        : MeshComponent(shaderName, "Plane", true, GL_TRIANGLES,
+                Vertices{Primitives::planeVertices},
+                Elements{Primitives::planeIndices},
+                        {
+                                {ShaderDataType::Float3, "a_Position"},
+                                {ShaderDataType::Float3, "a_Normal"},
+                                {ShaderDataType::Float2, "a_TexCoord"}
+                        }
         ) {}
     };
     struct MeshQuad : MeshComponent {
         MeshQuad() : MeshQuad("null") {}
         explicit MeshQuad(const std::string& shaderName)
-        : MeshComponent(shaderName, "Quad", true,
-                {Primitives::quadVertices3D, sizeof (Primitives::quadVertices3D)},
-                {Primitives::quadIndices, sizeof (Primitives::quadIndices)},
+        : MeshComponent(shaderName, "Quad", true, GL_TRIANGLES,
+                Vertices{Primitives::quadVertices3D},
+                Elements{Primitives::quadIndices},
                         {
                                 {ShaderDataType::Float3, "a_Position"},
                                 {ShaderDataType::Float2, "a_TexCoord"}
@@ -117,102 +106,6 @@ namespace Slate {
         ) {}
     };
 
-    inline std::vector<float> GenerateGridVertices(float size, unsigned int numLines) {
-        std::vector<float> vertices; // tempy for return and loop
-        // auto calc spacing
-        float spacing = size / static_cast<float>(numLines);
-        // lines along x and z
-        for (unsigned int i = 0; i <= numLines; ++i) {
-            float pos = -size / 2.0f + i * spacing;  // line position
-
-            // x-axis
-            vertices.push_back(-size / 2.0f);
-            vertices.push_back(0.0f);
-            vertices.push_back(pos);
-
-            vertices.push_back(size / 2.0f);
-            vertices.push_back(0.0f);
-            vertices.push_back(pos);
-
-            // z-axis
-            vertices.push_back(pos);
-            vertices.push_back(0.0f);
-            vertices.push_back(-size / 2.0f);
-
-            vertices.push_back(pos);
-            vertices.push_back(0.0f);
-            vertices.push_back(size / 2.0f);
-        }
-        return vertices;
-    }
-    inline std::vector<float> GenerateCircleVertices(int numSegments) {
-        float radius = 1.0f;
-        std::vector<float> vertices;
-        float angleIncrement = 2.0f * (float) M_PI / (float) numSegments;
-
-        for (int i = 0; i < numSegments; ++i) {
-            float angle = (float) i * angleIncrement;
-            float x = radius * cos(angle);
-            float y = radius * sin(angle);
-            vertices.push_back(x);
-            vertices.push_back(y);
-            vertices.push_back(0.0f);  // circle is 2D
-        }
-
-        return vertices;
-    }
-
-    inline std::vector<float> GenerateArrow2DMesh(float shaftLength, float shaftWidth, float tipWidth, float tipHeight) {
-        std::vector<float> vertices;
-
-        // bottom vertex
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-        vertices.push_back(0.0f);
-
-        // top vertex
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength);
-        vertices.push_back(0.0f);
-
-        // triangle tip
-        vertices.push_back(-tipWidth);
-        vertices.push_back(shaftLength);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength + tipHeight);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(tipWidth);
-        vertices.push_back(shaftLength);
-        vertices.push_back(0.0f);
-
-        // and back to top vertex
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength);
-        vertices.push_back(0.0f);
-
-        // now again but on the z axis so we have two arrow tips!
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength);
-        vertices.push_back(-tipWidth);
-
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength + tipHeight);
-        vertices.push_back(0.0f);
-
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength);
-        vertices.push_back(tipWidth);
-
-        // and back again to top vertex
-        vertices.push_back(0.0f);
-        vertices.push_back(shaftLength);
-        vertices.push_back(0.0f);
-
-        return vertices;
-    }
 
 
     struct MeshGrid : MeshComponent {
@@ -245,7 +138,7 @@ namespace Slate {
         TransformComponent() : TransformComponent(glm::vec3(0.0f), glm::vec3(0.0f), glm::vec3(1.0f)) {};
         explicit TransformComponent(glm::vec3 ipos) : TransformComponent(ipos, glm::vec3(0.0f), glm::vec3(1.0f)) {};  // single arg constructor as explicit
         TransformComponent(glm::vec3 ipos, glm::vec3 irot) : TransformComponent(ipos, irot, glm::vec3(1.0f)) {};
-        TransformComponent(glm::vec3 ipos, glm::vec3 irot, glm::vec3 iscal) : Position(ipos), Rotation(irot), Scale(iscal) {};
+        TransformComponent(glm::vec3 ipos, glm::vec3 irot, glm::vec3 iscale) : Position(ipos), Rotation(irot), Scale(iscale) {};
 
         glm::mat4 GetTransform() const {
             return glm::translate(glm::mat4(1.0f), Position)
@@ -261,8 +154,9 @@ namespace Slate {
         virtual ~BaseLight() = default;
         virtual std::string GetTypeName() = 0;
     public:
+        unsigned int number;
         glm::vec3 Color{1.0f, 1.0f, 1.0f};
-        float Intensity{5.0f};
+        float Intensity{1.0f};
     };
 
     struct DirectionalLightComponent : BaseLight {
@@ -280,7 +174,6 @@ namespace Slate {
 
     struct PointLightComponent : BaseLight {
         PointLightComponent() {
-
         }
         explicit PointLightComponent(glm::vec3 color) {
             Color = color;
@@ -301,7 +194,9 @@ namespace Slate {
     public:
         std::string GetTypeName() override { return "Spot"; }
     public:
-
+        glm::vec3 Direction{0.0, -1.0, 0.0};
+        float Size{45.0f};
+        float Blend{1.0f};
     };
 
     struct TextComponent {
@@ -333,8 +228,13 @@ namespace Slate {
     template<typename... Component>
     struct ComponentGroup{};
     using AllComponents =
-            ComponentGroup<TransformComponent, MeshComponent, ScriptComponent,
-            DirectionalLightComponent, PointLightComponent, SpotLightComponent,
-            TextComponent>;
+            ComponentGroup<
+                    TransformComponent,
+					MeshComponent,
+					ScriptComponent,
+					DirectionalLightComponent,
+					PointLightComponent,
+					SpotLightComponent,
+					TextComponent
+					>;
 }
-#endif //SLATE_COMPONENTS_H

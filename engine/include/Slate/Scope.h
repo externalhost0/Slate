@@ -2,8 +2,8 @@
 // Created by Hayden Rivas on 11/26/24.
 //
 
-#ifndef SLATEEDITOR_SCOPE_H
-#define SLATEEDITOR_SCOPE_H
+#pragma once
+
 #include <memory>
 namespace Slate {
     // alias for std::shared_ptr
@@ -16,5 +16,3 @@ namespace Slate {
         return std::make_unique<T>(std::forward<Args>(args)...);
     }
 }
-
-#endif //SLATEEDITOR_SCOPE_H

@@ -10,18 +10,11 @@
 #include "ViewportCamera.h"
 namespace Slate {
 
-    ViewportCamera::ViewportCamera() :
-        m_AspectRatio(1.33f),
-        m_FOV(65),
-        m_ZNear(0.1f),
-        m_ZFar(100.f) {}
-
-
-    ViewportCamera::ViewportCamera(YAML::Node configfile) :
-        m_FOV(configfile["fov"].as<int>(65)),
-        m_ZNear(configfile["near"].as<float>(0.1f)),
-        m_ZFar(configfile["far"].as<float>(100.f)),
-        m_CameraBaseSpeed(configfile["base_speed"].as<float>(5.f)) {}
+//    ViewportCamera::ViewportCamera(YAML::Node configfile) :
+//        m_FOV(configfile["fov"].as<int>(65)),
+//        m_ZNear(configfile["near"].as<float>(0.1f)),
+//        m_ZFar(configfile["far"].as<float>(100.f)),
+//        m_CameraBaseSpeed(configfile["base_speed"].as<float>(5.f)) {}
 
     // when our viewport resizes
     void ViewportCamera::OnResize(float width, float height) {
@@ -31,7 +24,7 @@ namespace Slate {
 
     void ViewportCamera::UpdateCamera() {
         // Set perspective projection matrix
-        m_ProjectionMatrix = glm::perspective(glm::radians((float) m_FOV), m_AspectRatio, m_ZNear, m_ZFar);
+        m_ProjectionMatrix = glm::perspective(glm::radians(static_cast<float>(m_FOV)), m_AspectRatio, m_ZNear, m_ZFar);
         m_ViewMatrix = glm::lookAt(m_CameraPosition, m_CameraPosition + m_CameraFront, cameraUp);
 
         // Set uniform matrices for camera specific input
@@ -39,14 +32,12 @@ namespace Slate {
         // figure a way to cache and store shaders so that we dont accidently set shaders across different components
         // look up uniform buffer objects or ssbo
         auto shaderMan = SystemLocator::Get<RenderManager>();
-        auto viewer = m_ActiveContext->m_ActiveScene->GetAllEntitiesWith<TransformComponent, MeshComponent>();
+        auto viewer = m_ActiveContext->m_ActiveScene->GetAllIDsWith<TransformComponent, MeshComponent>();
         for (auto id : viewer) {
             Entity entity {id, m_ActiveContext->m_ActiveScene};
             shaderMan.GetShaderManager().Get("Basic")->SetMat4("v_ViewMatrix", m_ViewMatrix);
             shaderMan.GetShaderManager().Get("Basic")->SetMat4("v_ProjectionMatrix", m_ProjectionMatrix);
-            shaderMan.GetShaderManager().Get("Basic")->SetVec3("v_ViewPos", m_CameraPosition.x, m_CameraPosition.y,
-                                                               m_CameraPosition.z);
-
+            shaderMan.GetShaderManager().Get("Basic")->SetVec3("v_ViewPos", m_CameraPosition.x, m_CameraPosition.y, m_CameraPosition.z);
         }
         shaderMan.GetShaderManager().Get("solid_color")->SetMat4("v_ViewMatrix", m_ViewMatrix);
         shaderMan.GetShaderManager().Get("solid_color")->SetMat4("v_ProjectionMatrix", m_ProjectionMatrix);
@@ -119,14 +110,13 @@ namespace Slate {
         xoffset *= MOUSE_SENSITIVITY;
         yoffset *= MOUSE_SENSITIVITY;
 
-        ProcessMouse((float) xoffset, (float) yoffset);
+        ProcessMouse(static_cast<float>(xoffset), static_cast<float>(yoffset));
     }
 
     float BASE_SPEED = 5.0f;
     float SPRINT_MULTIPLIER = 2.0f;
     void ViewportCamera::IndependentInput() {
         MouseUpdate();
-
         auto inputMan = SystemLocator::Get<InputManager>();
 
         glm::vec3 scaledVector;
@@ -135,7 +125,7 @@ namespace Slate {
             m_CameraActualSpeed = m_CameraBaseSpeed * SPRINT_MULTIPLIER;
         else
             m_CameraActualSpeed = m_CameraBaseSpeed;
-        float adjustedSpeed = m_CameraActualSpeed * (float) Time::GetDeltaTime();
+        float adjustedSpeed = m_CameraActualSpeed * static_cast<float>(Time::GetDeltaTime());
 
         if (inputMan.IsKeyPressed(GLFW_KEY_W))
             m_CameraPosition = m_CameraPosition + adjustedSpeed * m_CameraFront;

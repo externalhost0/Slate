@@ -2,17 +2,17 @@
 // Created by Hayden Rivas on 11/28/24.
 //
 
-#ifndef SLATEEDITOR_BUFFEROBJECT_H
-#define SLATEEDITOR_BUFFEROBJECT_H
-#include <vector>
+#pragma once
 #include <glad/glad.h>
-#include "Expect.h"
-#include "Ref.h"
+#include <vector>
 #include <string>
 #include <utility>
 
+#include "Expect.h"
+#include "Ref.h"
+
 namespace Slate {
-    enum class ShaderDataType {
+    enum class ShaderDataType : unsigned char {
         None = 0,
 
         Bool,
@@ -68,7 +68,7 @@ namespace Slate {
         std::string Name;
         ShaderDataType Type;
         uint16_t Size;
-        size_t Offset;
+        std::size_t Offset;
         bool Normalized;
 
         BufferElement(ShaderDataType type, std::string name, bool normalized = false)
@@ -155,7 +155,7 @@ namespace Slate {
 
     private:
         void CalculateOffsetAndStride() {
-            size_t offset = 0;
+            std::size_t offset = 0;
             for (auto& el : m_Elements) {
                 el.Offset = offset;
                 offset += el.Size;
@@ -187,21 +187,32 @@ namespace Slate {
         Vertices() = default;
         explicit Vertices(std::vector<float> data)
                 : m_Data(std::move(data)), m_Size(data.size() * sizeof (float)) {}
-        Vertices(const float* data, size_t size)
+
+        // removes requirement for passing size
+        template <std::size_t N>
+        explicit Vertices(const float (&data)[N])
+                : m_Data(data, data + N), m_Size(N * sizeof(float)) {}
+
+        Vertices(const float* data, std::size_t size)
                 : m_Data(std::vector<float>(data, data + size / sizeof (float))), m_Size(size){}
 
-        size_t m_Size{};
+        std::size_t m_Size{};
         std::vector<float> m_Data;
     };
     struct Elements {
         Elements() = default;
         explicit Elements(std::vector<unsigned int> data)
                 : m_Data(std::move(data)), m_Size(data.size() * sizeof (unsigned int)) {}
-        Elements(const unsigned int* data, size_t size)
+
+        // removes requirement for passing size
+        template <std::size_t N>
+        explicit Elements(const unsigned int (&data)[N])
+                : m_Data(data, data + N), m_Size(N * sizeof(unsigned int)) {}
+
+        Elements(const unsigned int* data, std::size_t size)
                 : m_Data(std::vector<unsigned int>(data, data + size / sizeof (unsigned int))), m_Size(size){}
 
-        size_t m_Size{};
+        std::size_t m_Size{};
         std::vector<unsigned int> m_Data;
     };
 }
-#endif //SLATEEDITOR_BUFFEROBJECT_H

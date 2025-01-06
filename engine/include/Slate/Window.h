@@ -2,8 +2,7 @@
 // Created by Hayden Rivas on 12/7/24.
 //
 
-#ifndef SLATEEDITOR_WINDOW_H
-#define SLATEEDITOR_WINDOW_H
+#pragma once
 
 #include "IManager.h"
 #include "Enums.h"
@@ -58,5 +57,3 @@ namespace Slate {
     };
 
 }
-
-#endif //SLATEEDITOR_WINDOW_H

@@ -32,7 +32,7 @@ namespace Slate {
         entity.ID = uuid;
         entity.AddComponent<CoreComponent>(name);
 
-        m_EntityMap[uuid] = (entt::entity) entity;
+        m_EntityMap[uuid] = entity.GetEntityHandle();
         return entity;
     }
 
@@ -58,7 +58,7 @@ namespace Slate {
 
     void Scene::DestroyEntity(Entity entity) {
         m_EntityMap.erase(entity.GetUUID());
-        m_Registry.destroy((entt::entity) entity);
+        m_Registry.destroy(entity.GetEntityHandle());
     }
 
 

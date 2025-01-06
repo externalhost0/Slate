@@ -4,6 +4,7 @@
 
 #include <glad/glad.h>
 
+#include "Slate/Debug.h"
 #include "Slate/Font.h"
 #include "Slate/Expect.h"
 
@@ -33,9 +34,9 @@ namespace Slate {
         AddFont(path.stem().string(), path);
     }
     void FontManager::AddFont(const std::string& name, const std::filesystem::path &path) {
-        EXPECT(!Exists(path), "Font already exists!")
+        EXPECT(!Exists(name), "Font already exists!")
         FT_Face face;
-        if (FT_New_Face(m_FTLibrary, path.c_str(), 0, &face)) {
+        if (FT_New_Face(m_FTLibrary, path.string().c_str(), 0, &face)) {
             fprintf(stderr, "Failed to load font!\n");
             return;
         }
@@ -54,26 +55,25 @@ namespace Slate {
         }
         if (!m_FTFace->glyph->bitmap.buffer) {
             fprintf(stderr, "Warning: Glyph buffer is null for glyph: '%c' (ASCII: %d)\n",
-                    isprint(glyph) ? glyph : '?', (int)glyph);
+                    isprint(glyph) ? glyph : '?', static_cast<int>(glyph));
             return;
         }
         fprintf(stderr, "Logging: Glyph successfully loaded for glyph: '%c' (ASCII: %d)\n",
-                isprint(glyph) ? glyph : '?',
-                (int)glyph);
+                isprint(glyph) ? glyph : '?', static_cast<int>(glyph));
 
         // construct and insert the lightbulbTexture
         unsigned int texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
-                     (int) m_FTFace->glyph->bitmap.width, (int) m_FTFace->glyph->bitmap.rows,
+        GL_CALL(glGenTextures(1, &texture));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
+        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RED,
+                     static_cast<int>(m_FTFace->glyph->bitmap.width), static_cast<int>(m_FTFace->glyph->bitmap.rows),
                      0, GL_RED, GL_UNSIGNED_BYTE, m_FTFace->glyph->bitmap.buffer
-                     );
+                     ));
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
         m_Characters.insert(std::pair<unsigned char, Character>(glyph, {
             texture,
