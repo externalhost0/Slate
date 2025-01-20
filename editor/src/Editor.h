@@ -12,7 +12,6 @@
 #include "Context.h"
 #include "gui/EditorGUI.h"
 
-
 namespace Slate {
     // inherit publicly to use create function!!
     class Editor : public Application {

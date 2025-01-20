@@ -101,6 +101,7 @@ namespace Slate {
                 Elements{Primitives::quadIndices},
                         {
                                 {ShaderDataType::Float3, "a_Position"},
+								{ShaderDataType::Float3, "a_Normal"},
                                 {ShaderDataType::Float2, "a_TexCoord"}
                         }
         ) {}
@@ -154,7 +155,7 @@ namespace Slate {
         virtual ~BaseLight() = default;
         virtual std::string GetTypeName() = 0;
     public:
-        unsigned int number;
+        unsigned int number{};
         glm::vec3 Color{1.0f, 1.0f, 1.0f};
         float Intensity{1.0f};
     };

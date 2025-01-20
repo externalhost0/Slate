@@ -37,7 +37,6 @@ namespace Slate {
         GLFWwindow* GetNativeWindow() const { return m_NativeWindow; };
         const WindowSpecification &GetSpecification() const { return m_WindowSpecification; };
 
-
     private:
         WindowSpecification m_WindowSpecification;
         GLFWwindow* m_NativeWindow{nullptr};

@@ -18,7 +18,7 @@
 namespace Slate {
     // set of helper functions for error messages
     void glfwErrorCallback(int error_code, const char *description) {EXPECT(error_code, "%s", description)}
-    void exitCallback() { printf("Editor Exit Callback!\n"); }
+    void exitCallback() { printf("Editor Proper Exit Callback!\n"); }
 
     void setupErrorHandling() {
         glfwSetErrorCallback(glfwErrorCallback);
@@ -28,7 +28,6 @@ namespace Slate {
 
     void Editor::Initialize() {
         setupErrorHandling(); // placed at beginning arbitarly
-
 
         // generate the main editor window, createScope builds it
         WindowSpecification winspec;
@@ -45,29 +44,20 @@ namespace Slate {
         glEnable(GL_CULL_FACE); // set culling so only front faces show
         glCullFace(GL_BACK); // cull back
         glFrontFace(GL_CCW); // tell opengl all of our stuff is counter clockwise
-		glEnable(GL_MULTISAMPLE);
 
+		// file system dependency setup
 		NFD_Init();
 
-
-        // idk where to put this
-        // or if it should be put anywhere at all
 
         // must be done before attaching, lets find a better way later
         // prefferably through constructors and not functions that are arbitraly called
         FramebufferSpecification fbSpec;
         // color, entity id, and depth
-        fbSpec.Attachments = {FramebufferTextureFormat::RGB8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::DEPTH24STENCIL8 };
+        fbSpec.Attachments = {FramebufferTextureFormat::RGBA8, FramebufferTextureFormat::RED_INTEGER, FramebufferTextureFormat::DEPTH24STENCIL8 };
         fbSpec.Width = 1280;
         fbSpec.Height = 720;
         fbSpec.Samples = 1;
         m_Framebuffer = CreateRef<Framebuffer>(fbSpec);
-
-		unsigned int tg;
-		GL_CALL(glGenTextures(1, &tg));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tg));
-		GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, 1280, 720, GL_TRUE));
-		GL_CALL(glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0));
 
         m_ActiveContext = CreateRef<Context>();
         m_ActiveContext->m_ActiveScene = new Scene();
@@ -86,40 +76,8 @@ namespace Slate {
         renderMan.GetShaderManager().Load("Basic", "assets/shaders/vertex/static_PNT.vert", "assets/shaders/fragment/standard.frag");
         // for editor icons
 
-        auto& fontMan = SystemLocator::Get<FontManager>();
-//        fontMan.AddFont("NotoSans-Regular", "../editor/assets/fonts/lucide.ttf");
-//        glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // use a single byte
-//
-//        for (unsigned int c = ICON_MIN_LC; c <= ICON_MAX_16_LC; c++) {
-//            fontMan.GetFont("NotoSans-Regular")->BuildGlyph(c);
-//        }
-//        FT_Done_Face(fontMan.GetFont("NotoSans-Regular")->GetFace());
-//
-
-
         auto scene = m_ActiveContext->m_ActiveScene;
 
-        TransformComponent transform1;
-        transform1.Position = {2.0f, 0.0f, 0.0f};
-
-//        Mesh cubeMesh;
-//        cubeMesh.m_VertexData = { Primitives::cubeVertices, sizeof (Primitives::cubeVertices)};
-//        cubeMesh.m_ElementData = { Primitives::cubeIndices, sizeof (Primitives::cubeIndices)};
-//        cubeMesh.m_Layout = {
-//                {ShaderDataType::Float3, "a_Position"},
-//                {ShaderDataType::Float3, "a_Normal"},
-//                {ShaderDataType::Float2, "a_TexCoord"}
-//        };
-//        cubeMesh.BuildMesh();
-//
-//        MeshComponent mesh1;
-//        mesh1.m_Meshes.push_back(cubeMesh);
-//        mesh1.m_ShaderName = "Basic";
-//
-//
-//        Entity cube1 = scene->CreateEntity("Cube1");
-//        cube1.AddComponent<TransformComponent>(transform1);
-//        cube1.AddComponent<MeshComponent>(mesh1);
 
         Entity cube2 = scene->CreateEntity("Cube2");
         cube2.AddComponent<TransformComponent>(glm::vec3(0.0f, 5.0f, 2.0f));
@@ -143,11 +101,12 @@ namespace Slate {
         object2.AddComponent<MeshComponent>(MeshImport("Basic", ToDirectory("assets/models/column.obj")));
 
 
-        Entity object3 = m_ActiveContext->m_ActiveScene->CreateEntity("Dragon1");
-        object3.AddComponent<TransformComponent>(glm::vec3(4.0f, -4.0f, -4.0f));
-        object3.GetComponent<TransformComponent>().Scale /= 30.0f;
-        object3.AddComponent<MeshComponent>(MeshImport("Basic", ToDirectory("assets/models/xyzrgb_dragon.obj")));
+		// test models on my system
 
+//        Entity object3 = m_ActiveContext->m_ActiveScene->CreateEntity("Dragon1");
+//        object3.AddComponent<TransformComponent>(glm::vec3(4.0f, -4.0f, -4.0f));
+//        object3.GetComponent<TransformComponent>().Scale /= 30.0f;
+//        object3.AddComponent<MeshComponent>(MeshImport("Basic", ToDirectory("assets/models/xyzrgb_dragon.obj")));
 //        Entity meowrine = m_ActiveContext->m_ActiveScene->CreateEntity("Meowrine Figure");
 //        meowrine.AddComponent<TransformComponent>();
 //        meowrine.AddComponent<MeshComponent>(MeshImport("Basic", "../editor/assets/models/meowrine.obj"));
@@ -181,7 +140,6 @@ namespace Slate {
     void Editor::Loop() {
         auto nativeWindow = SystemLocator::Get<WindowManager>().GetWindow().GetNativeWindow();
         auto renderMan = SystemLocator::Get<RenderManager>();
-        auto& fontMan = SystemLocator::Get<FontManager>();
 
         glfwPollEvents();
         // actual stuff //

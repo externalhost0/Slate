@@ -133,7 +133,7 @@ namespace Slate {
         ImGui_ImplOpenGL3_Init("#version 410 core");
 
 
-        Ref<PropertiesPanel> pp = CreateRef<PropertiesPanel>();
+//        Ref<PropertiesPanel> pp = CreateRef<PropertiesPanel>();
 
         m_Panels = { CreateRef<PropertiesPanel>(), CreateRef<ViewportPanel>(framebuffer), CreateRef<ScenePanel>(), CreateRef<AssetsPanel>() };
 
@@ -169,7 +169,6 @@ namespace Slate {
         }
         ImGui::EndMainMenuBar();
 
-        ImGui::ShowDemoWindow();
 
 
         // each panel update

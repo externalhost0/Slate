@@ -10,7 +10,7 @@
 namespace Slate {
     enum class FramebufferTextureFormat{
         None = 0,
-        RGB8,
+        RGBA8,
         RGBA16F,
         RED_INTEGER,
         DEPTH24STENCIL8,

@@ -28,11 +28,6 @@ namespace Slate {
         }
         static void AttachColorTexture(uint32_t id, int samples, GLenum internalFormat, GLenum format, uint32_t width, uint32_t height, int index) {
             bool multisampled = samples > 1;
-			GLint maxDepthSamples = 0;
-			GLint maxColorSamples = 0;
-			GLint maxSampels = 0;
-
-
             if (multisampled) {
                 GL_CALL(glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, internalFormat, width, height, false));
             }
@@ -73,7 +68,7 @@ namespace Slate {
 
         static GLenum CustomFBTextureFormatToGL(FramebufferTextureFormat format) {
             switch (format) {
-                case FramebufferTextureFormat::RGB8:       return GL_RGB8;
+                case FramebufferTextureFormat::RGBA8:       return GL_RGBA8;
                 case FramebufferTextureFormat::RED_INTEGER: return GL_RED_INTEGER;
                 default:
                     EXPECT(false, "A case needs to be implemented in FormatToGL")
@@ -147,8 +142,8 @@ namespace Slate {
             for (int i = 0; i < m_ColorAttachments.size(); i++) {
                 GL_CALL(glBindTexture(Utils::TextureTarget(multisample), m_ColorAttachments[i]));
                 switch (m_ColorAttachmentSpecifications[i].TextureFormat) {
-                    case FramebufferTextureFormat::RGB8:
-                        Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGB8, GL_RGB, m_Specification.Width, m_Specification.Height, i);
+                    case FramebufferTextureFormat::RGBA8:
+                        Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_RGBA8, GL_RGBA, m_Specification.Width, m_Specification.Height, i);
                         break;
                     case FramebufferTextureFormat::RED_INTEGER:
                         Utils::AttachColorTexture(m_ColorAttachments[i], m_Specification.Samples, GL_R32I, GL_RED_INTEGER, m_Specification.Width, m_Specification.Height, i);

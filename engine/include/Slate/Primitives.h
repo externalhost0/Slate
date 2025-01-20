@@ -18,12 +18,19 @@ namespace Slate::Primitives {
             1.f, -1.f, 1.f, 0.f, // bottom right
             1.f, 1.f, 1.f, 1.f // top right
     };
+	constexpr float quadVertices3DNoNormals[] = {
+			// positions                 		  // texCoords
+			-1.f, 1.f,   1.f,  0.f, 1.f, // top left
+			-1.f, -1.f, 1.f,   0.f, 0.f, // bottom left
+			1.f, -1.f, 1.f, 1.f, 0.f, // bottom right
+			1.f, 1.f,  1.f, 1.f, 1.f // top right
+	};
     constexpr float quadVertices3D[] = {
-            // positions                           // texCoords
-            -1.f, 1.f, 1.f,    0.f, 1.f, // top left
-            -1.f, -1.f, 1.f,  0.f, 0.f, // bottom left
-            1.f, -1.f, 1.f, 1.f, 0.f, // bottom right
-            1.f, 1.f, 1.f,  1.f, 1.f // top right
+            // positions                          // normals            		  // texCoords
+            -1.f, 1.f,   0.f,  0.f,  0.f,  1.f, 0.f, 1.f, // top left
+            -1.f, -1.f, 0.f,  0.f, 0.f, 1.f, 0.f, 0.f, // bottom left
+            1.f, -1.f, 0.f,  0.f, 0.f, 1.f,1.f, 0.f, // bottom right
+            1.f, 1.f,  0.f, 0.f, 0.f, 1.f, 1.f, 1.f // top right
     };
 
 

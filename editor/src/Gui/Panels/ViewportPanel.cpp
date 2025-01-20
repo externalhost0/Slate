@@ -54,7 +54,7 @@ namespace Slate {
 		// everything required for the depth shader and its own framebuffer
 		{
 			FramebufferSpecification fbSpec;
-			fbSpec.Attachments = {FramebufferTextureFormat::RGB8};
+			fbSpec.Attachments = {FramebufferTextureFormat::RGBA8};
 			fbSpec.Width = 1280;
 			fbSpec.Height = 720;
 			m_PostProcessFramebuffer = CreateRef<Framebuffer>(fbSpec);
@@ -76,7 +76,7 @@ namespace Slate {
 			);
 
 			quad = CreateScope<Mesh>(
-					Vertices{Primitives::quadVertices3D},
+					Vertices{Primitives::quadVertices3DNoNormals},
 					Elements{Primitives::quadIndices},
 					LayoutBuffer{
 							{ShaderDataType::Float3, "a_Position"},
@@ -175,6 +175,7 @@ namespace Slate {
 			solidShader = CreateScope<Shader>("Solid", ToDirectory("assets/shaders/vertex/static_PT.vert"),
 											  ToDirectory("assets/shaders/fragment/solidcolor.frag"));
 
+			// requires entity input
 			iconShader = CreateScope<Shader>("Icon", ToDirectory("assets/shaders/vertex/billboard_PT.vert"),
 											 ToDirectory("assets/shaders/fragment/entity_icon.frag"));
 
@@ -229,11 +230,9 @@ namespace Slate {
 				auto &light = entity.GetComponent<DirectionalLightComponent>();
 
 				auto model = glm::mat4(1.0f);
-				model = glm::translate(model,
-									   glm::vec3(transform.Position.x, transform.Position.y, transform.Position.z));
+				model = glm::translate(model,glm::vec3(transform.Position.x, transform.Position.y, transform.Position.z));
 
-				glm::quat rotationQuat = glm::quat(
-						glm::radians(glm::vec3(transform.Rotation.x, transform.Rotation.y, transform.Rotation.z)));
+				glm::quat rotationQuat = glm::quat(glm::radians(glm::vec3(transform.Rotation.x, transform.Rotation.y, transform.Rotation.z)));
 				auto arrowmodel = model * glm::mat4_cast(rotationQuat);
 
 
@@ -299,6 +298,7 @@ namespace Slate {
 
 				iconShader->SetVec3("u_Color", light.Color.r, light.Color.g, light.Color.b);
 
+
 				GL_CALL(glEnable(GL_BLEND));
 				GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 				GL_CALL(glActiveTexture(GL_TEXTURE0));
@@ -317,11 +317,10 @@ namespace Slate {
 				auto &light = entity.GetComponent<SpotLightComponent>();
 
 				auto model = glm::mat4(1.0f);
-				model = glm::translate(model,
-									   glm::vec3{transform.Position.x, transform.Position.y, transform.Position.z});
+				model = glm::translate(model,glm::vec3{transform.Position.x, transform.Position.y, transform.Position.z});
 
-				glm::quat rotationQuat = glm::quat(
-						glm::radians(glm::vec3{transform.Rotation.x, transform.Rotation.y, transform.Rotation.z}));
+
+				glm::quat rotationQuat = glm::quat(glm::radians(glm::vec3{transform.Rotation.x, transform.Rotation.y, transform.Rotation.z}));
 				auto spotmodel = model * glm::mat4_cast(rotationQuat);
 
 
@@ -451,8 +450,7 @@ namespace Slate {
 					ImGui::SameLine();
 					auto &renderman = SystemLocator::Get<RenderManager>();
 
-					if (ImGui::ColorButton("Clear Color", ImVec4(renderman.m_ClearColor[0], renderman.m_ClearColor[1],
-																 renderman.m_ClearColor[2], renderman.m_ClearColor[3]),
+					if (ImGui::ColorButton("Clear Color", ImVec4(renderman.m_ClearColor[0], renderman.m_ClearColor[1],renderman.m_ClearColor[2], renderman.m_ClearColor[3]),
 										   ImGuiColorEditFlags_NoSidePreview,
 										   ImVec2(ImGui::GetFontSize() * 3, ImGui::GetTextLineHeight())))
 						ImGui::OpenPopup("ev-picker");
@@ -621,12 +619,7 @@ namespace Slate {
 				m_ViewportSize = {viewportPanelSize.x, viewportPanelSize.y};
 			}
 
-			ImGui::Image(reinterpret_cast<void *>(textureID), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2{0, 1},
-						 ImVec2{1, 0});
-
-
-
-
+			ImGui::Image(reinterpret_cast<void *>(textureID), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2{0, 1},ImVec2{1, 0});
 
 			// this used a 2d method that was lackluster, now better method in main loop
 			// after image is rendered in imgui, draw text & icons on top

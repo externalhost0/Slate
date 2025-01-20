@@ -17,9 +17,7 @@ add_library(${PROJECT_NAME}
         lib/ShaderLibrary.cpp
         lib/Font.cpp
         lib/Window.cpp
-        include/Slate/MeshGenerators.h
         lib/Math.cpp
-        include/Slate/Math.h
 )
 
 # packages
