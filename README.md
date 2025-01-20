@@ -11,7 +11,13 @@ A small side project of mine, written in C++ 17 using OpenGL, EnTT, Dear ImGui a
 
 ### Some viewmodes inside the editor:
 
-![Depth View](docs/depth.png)
-![Wireframe View](docs/wireframe.png)
-![Normals View](docs/normals.png)
-![Shaded View](docs/shaded.png)
+<div align="center">
+<img src="/docs/depth.png" alt="Depth View" width="260"/>
+<img src="/docs/wireframe.png" alt="Wireframe View" width="260"/>
+<img src="/docs/normals.png" alt="Normals View" width="260"/>
+<img src="/docs/shaded.png" alt="Shaded View" width="260"/>
+
+<h6>Also accepts imported models.</h6>
+<img src="/docs/models.png" alt="Images w/ Models" width="520"/>
+</div>
+
