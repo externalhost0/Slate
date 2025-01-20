@@ -1,8 +1,9 @@
 # Slate Engine & Editor
 
-A small side project of mine, written in C++ 17 using OpenGL, EnTT, Dear ImGui and some other small libraries. 
 
-(Rewriting completely for the fun of it.)
+A small test project of mine, unpolished and full of bugs, written in C++ 17 using OpenGL, EnTT, Dear ImGui and some other small libraries.
+
+(As of now rewriting completely for the fun of it and it will probably be under a new repo.)
 
 ## What the editor looks like!
 #### Scroll for some screenshots.
