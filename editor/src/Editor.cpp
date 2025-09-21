@@ -26,6 +26,7 @@ namespace Slate {
     }
 
 
+	GLFWcursor* curs;
     void Editor::Initialize() {
         setupErrorHandling(); // placed at beginning arbitarly
 
@@ -38,6 +39,7 @@ namespace Slate {
         myFirstWindow.ConstructWindow();
         SystemLocator::Get<WindowManager>().SetMainWindow(myFirstWindow);
 
+		curs = glfwCreateStandardCursor(GLFW_CROSSHAIR_CURSOR);
         // needs to be done after window creation, specifically glad init
         glEnable(GL_DEPTH_TEST); // enable depth testing
         glEnable(GL_STENCIL_TEST); // enable stencil testing (for outlines)
@@ -156,6 +158,7 @@ namespace Slate {
             // ACTION
             // - - - - - -
 
+			glfwSetCursor(nativeWindow, curs);
 
             // THIS RENDER SEQUENCE SHOULD ONLY, AND I SAY ONLY FIRMLY, BE FOR EXPLICIT USER CREATED OBJECTS/ENTITIES
             // that means no editor only meshs should be rendered here

@@ -344,6 +344,7 @@ namespace Slate {
         {"Point Light", typeid(PointLightComponent)},
         {"Spot Light", typeid(SpotLightComponent)}
     }};
+    
     // later i want the mesh components to be empty by default
     // the defauly action upon adding a new component to your entity
     std::unordered_map<std::type_index, std::function<void(Context*)>> componentActions = {

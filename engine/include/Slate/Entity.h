@@ -1,9 +1,6 @@
 //
 // Created by Hayden Rivas on 11/9/24.
 //
-
-
-
 #pragma once
 
 #include <entt/entt.hpp>

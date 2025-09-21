@@ -208,6 +208,7 @@ namespace Slate {
 		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
 		ImGui::Begin("Viewport", nullptr, ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoCollapse);
 		{
+			
 			ImGui::PopStyleVar();
 			// doesnt show in depth mode
 			if (gridIsEnabled) {
